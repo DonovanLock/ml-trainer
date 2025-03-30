@@ -32,11 +32,17 @@ export class BufferedData {
   }
 
   addSample(data: { x: number; y: number; z: number }, timestamp: number) {
-    const sample = { ...data, timestamp };
-    this.buffer.add(sample);
-    if (this.listeners.size) {
-      this.listeners.forEach((l) => l(sample));
-    }
+    // const dataForSamples = [{ ...data }, { ...data, y: data.y + 0.5}, { ...data, y: data.y - 0.5}];
+    const dataForSamples = [{ ...data }];
+
+    dataForSamples.forEach((data) => {
+      const sample = { ...data, timestamp };
+      this.buffer.add(sample);
+
+      if (this.listeners.size) {
+        this.listeners.forEach((l) => l(sample));
+      }
+    });
   }
 
   getSamples(startTimeMillis: number, endTimeMillis: number = -1): XYZData {
@@ -54,9 +60,11 @@ export class BufferedData {
 
     for (let i = start + 1; i < ordered.length; ++i) {
       if (endTimeMillis === -1 || ordered[i].timestamp < endTimeMillis) {
-        result.x.push(ordered[i].x);
-        result.y.push(ordered[i].y);
-        result.z.push(ordered[i].z);
+        for(let delta = -0.5; delta <= 0.5; delta += 0.5) { // Simulates minor rotation on the y axis (around the wrist)
+          result.x.push(ordered[i].x);
+          result.y.push(ordered[i].y + delta);
+          result.z.push(ordered[i].z);
+        }
       }
     }
     return result;
