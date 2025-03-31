@@ -151,7 +151,7 @@ test("spits out files useful for testing", async () => {
     deviceSamplesLength: averageSamples,
   };
 
-  const trainingResult = await trainModel(trainingData, dataWindow);
+  const trainingResult = await trainModel(trainingData, dataWindow, 16 ,160);
   if (trainingResult.error) {
     return;
   }

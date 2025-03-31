@@ -17,16 +17,16 @@ export type TrainingResult =
 export const trainModel = async (
   data: ActionData[],
   dataWindow: DataWindow,
+  batch : number, epochNum : number,
   onProgress?: (progress: number) => void
 ): Promise<TrainingResult> => {
   const { features, labels } = prepareFeaturesAndLabels(data, dataWindow);
   const model: tf.LayersModel = createModel(data);
-  const totalNumEpochs = mlSettings.numEpochs;
 
   try {
     await model.fit(tf.tensor(features), tf.tensor(labels), {
-      epochs: totalNumEpochs,
-      batchSize: 16,
+      epochs: epochNum,
+      batchSize: batch,
       shuffle: true,
       // We don't do anything with the validation data, so might
       // as well train using all of it.
@@ -34,7 +34,7 @@ export const trainModel = async (
       callbacks: {
         onEpochEnd: (epoch: number) => {
           // Epochs indexed at 0
-          onProgress && onProgress(epoch / (totalNumEpochs - 1));
+          onProgress && onProgress(epoch / (epochNum - 1));
         },
       },
     });

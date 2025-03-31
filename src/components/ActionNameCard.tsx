@@ -10,6 +10,7 @@ import {
   HStack,
   Input,
   useToast,
+  Text,
 } from "@chakra-ui/react";
 import { useCallback, useMemo, useState } from "react";
 import { useIntl } from "react-intl";
