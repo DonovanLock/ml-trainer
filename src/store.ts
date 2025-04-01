@@ -86,9 +86,9 @@ interface PredictionResult {
 
 function removeTestData(actions : ActionData[], testNumber : number) : ActionData[] {
   const numActions = actions.length
-  const actions1 : ActionData[] = new Array(numActions)
+  const actions1 : ActionData[] = Array(numActions).fill(null).map(() => ({} as ActionData))
   for (let i = 0; i < numActions; i ++ ){
-    var j : number = 0
+    let j : number = 0
     actions1[i] = ({
       icon: actions[i].icon,
       ID: actions[i].ID,
@@ -110,9 +110,9 @@ function removeTestData(actions : ActionData[], testNumber : number) : ActionDat
 
 function removeTrainingData(actions : ActionData[], testNumber : number) : ActionData[] {
   const numActions = actions.length
-  const actions1 : ActionData[] = new Array(numActions)
+  const actions1 : ActionData[] = Array(numActions).fill(null).map(() => ({} as ActionData))
   for (let i = 0; i < numActions; i ++ ){
-    var j : number = 0
+    let j : number = 0
     actions1[i] = ({
       icon: actions[i].icon,
       ID: actions[i].ID,
@@ -824,12 +824,12 @@ const createMlStore = (logging: Logging) => {
              
           },
 
-          async testModel(testNumber, model){
+          testModel(testNumber, model){
             const {
               actions,
             } = get()
             const actions1 = removeTrainingData(actions, testNumber)
-            const correctPredictions : number[] = new Array(actions.length)
+            const correctPredictions : number[] = new Array<number>(actions.length)
             correctPredictions.fill(0,0,actions.length)
             const {
               tensorflowPredictionResult,
@@ -873,7 +873,7 @@ const createMlStore = (logging: Logging) => {
                 set({ trainModelProgress }, false, "trainModelProgress")
             );
             //const model = trainingResult.error ? undefined : trainingResult.model
-            var model1 : tf.LayersModel | undefined = undefined
+            let model1: tf.LayersModel | undefined = undefined
             if (!trainingResult.error){
               model1 = trainingResult.model
               if (testNumber > 0){
