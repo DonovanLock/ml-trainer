@@ -1,17 +1,10 @@
 import {
   Card,
   CardBody,
-  CloseButton,
-  HStack,
-  Input,
-  useToast,
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { useCallback, useMemo, useState } from "react";
-import { useIntl } from "react-intl";
-import { Action, ActionData } from "../model";
-import { useStore } from "../store";
+import { Action} from "../model";
 import { tourElClassname } from "../tours";
 
 
@@ -26,10 +19,8 @@ interface TestPassPercentCardProps {
 
 const TestPassCard = ({
     value,
-    onDeleteAction,
     onSelectRow,
     selected = false,
-    readOnly = false,
     disabled,
 }: TestPassPercentCardProps) => {
     return (

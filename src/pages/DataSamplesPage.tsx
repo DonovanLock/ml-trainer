@@ -59,7 +59,7 @@ const DataSamplesPage = () => {
     modelOptions[4] = testNumber
   }
 
-  const modelOptions : number[] = new Array(5)
+  const modelOptions : number[] = [16,160,0.1,16,0]
   const [batch, setBatchValue] = useState(16)
   const [showBatchTooltip, setShowBatchTooltip] = useState(false)
   const [epochNum, setEpochValue] = useState(161)
