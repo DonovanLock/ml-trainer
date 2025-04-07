@@ -297,9 +297,9 @@ export interface Actions {
   recordingStarted(): void;
   recordingStopped(): void;
   newSession(projectName?: string): void;
-  trainModelFlowStart: (batch : number, epochNum : number, testNumber : number, callback?: () => void) => Promise<void>;
+  trainModelFlowStart: (modelOptions: number[], callback?: () => void) => Promise<void>;
   closeTrainModelDialogs: () => void;
-  trainModel(batch : number, epochNum : number, testNumber : number): Promise<boolean>;
+  trainModel(modelOptions : number[]): Promise<boolean>;
   testModel(testNumber : number, model : tf.LayersModel): void;
   setSettings(update: Partial<Settings>): void;
   setLanguage(languageId: string): void;
@@ -803,13 +803,13 @@ const createMlStore = (logging: Logging) => {
             });
           },
 
-          async trainModelFlowStart(batch, epoch, testNumber, callback?: () => void) {
+          async trainModelFlowStart(modelOptions, callback?: () => void) {
             const {
               settings: { showPreTrainHelp },
               actions,
               trainModel,
             } = get();
-            if (!hasSufficientDataForTraining(actions, testNumber)) {
+            if (!hasSufficientDataForTraining(actions, modelOptions[4])) {
               set({
                 trainModelDialogStage: TrainModelDialogStage.InsufficientData,
               });
@@ -818,7 +818,7 @@ const createMlStore = (logging: Logging) => {
                 trainModelDialogStage: TrainModelDialogStage.Help,
               });
             } else {
-              await trainModel(batch, epoch, testNumber);
+              await trainModel(modelOptions);
               callback?.();
             }
              
@@ -848,7 +848,7 @@ const createMlStore = (logging: Logging) => {
             }
           },
 
-          async trainModel(batch, epoch, testNumber) {
+          async trainModel(modelOptions) {
             const { actions, dataWindow, testModel } = get();
             logging.event({
               type: "model-train",
@@ -858,7 +858,7 @@ const createMlStore = (logging: Logging) => {
               },
             });
             const actionName = "trainModel";
-            const actions1 = removeTestData(actions, testNumber);
+            const actions1 = removeTestData(actions, modelOptions[4]);
             set({
               trainModelDialogStage: TrainModelDialogStage.TrainingInProgress,
               trainModelProgress: 0,
@@ -868,7 +868,7 @@ const createMlStore = (logging: Logging) => {
             await new Promise((res) => setTimeout(res, 100));
             const trainingResult = await trainModel(
               actions1,
-              dataWindow, batch,epoch,
+              dataWindow, modelOptions,
               (trainModelProgress) =>
                 set({ trainModelProgress }, false, "trainModelProgress")
             );
@@ -876,8 +876,8 @@ const createMlStore = (logging: Logging) => {
             var model1 : tf.LayersModel | undefined = undefined
             if (!trainingResult.error){
               model1 = trainingResult.model
-              if (testNumber > 0){
-                testModel(testNumber, model1)
+              if (modelOptions[4] > 0){
+                testModel(modelOptions[4], model1)
               }
               else{
                 for (let i = 0; i < actions.length; i++){

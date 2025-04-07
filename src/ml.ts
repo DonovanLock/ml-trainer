@@ -17,16 +17,16 @@ export type TrainingResult =
 export const trainModel = async (
   data: ActionData[],
   dataWindow: DataWindow,
-  batch : number, epochNum : number,
+  modelOptions : number[],
   onProgress?: (progress: number) => void
 ): Promise<TrainingResult> => {
   const { features, labels } = prepareFeaturesAndLabels(data, dataWindow);
-  const model: tf.LayersModel = createModel(data);
+  const model: tf.LayersModel = createModel(data, modelOptions);
 
   try {
     await model.fit(tf.tensor(features), tf.tensor(labels), {
-      epochs: epochNum,
-      batchSize: batch,
+      epochs: modelOptions[1],
+      batchSize: modelOptions[0],
       shuffle: true,
       // We don't do anything with the validation data, so might
       // as well train using all of it.
@@ -34,7 +34,7 @@ export const trainModel = async (
       callbacks: {
         onEpochEnd: (epoch: number) => {
           // Epochs indexed at 0
-          onProgress && onProgress(epoch / (epochNum - 1));
+          onProgress && onProgress(epoch / (modelOptions[1] - 1));
         },
       },
     });
@@ -68,7 +68,7 @@ export const prepareFeaturesAndLabels = (
   return { features, labels };
 };
 
-const createModel = (actions: ActionData[]): tf.LayersModel => {
+const createModel = (actions: ActionData[], modelOptions: number[]): tf.LayersModel => {
   const numberOfClasses: number = actions.length;
   const inputShape = [
     mlSettings.includedFilters.size * mlSettings.includedAxes.length,
@@ -77,7 +77,7 @@ const createModel = (actions: ActionData[]): tf.LayersModel => {
   const input = tf.input({ shape: inputShape });
   const normalizer = tf.layers.batchNormalization().apply(input);
   const dense = tf.layers
-    .dense({ units: 16, activation: "relu" })
+    .dense({ units: modelOptions[3], activation: "relu" })
     .apply(normalizer);
   const softmax = tf.layers
     .dense({ units: numberOfClasses, activation: "softmax" })
@@ -86,7 +86,7 @@ const createModel = (actions: ActionData[]): tf.LayersModel => {
 
   model.compile({
     loss: "categoricalCrossentropy",
-    optimizer: tf.train.sgd(mlSettings.learningRate),
+    optimizer: tf.train.sgd(modelOptions[2]),
     metrics: ["accuracy"],
   });
 

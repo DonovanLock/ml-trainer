@@ -55,12 +55,25 @@ const DataSamplesPage = () => {
     }
   }
 
+  function upDateModelOptions() : void {
+    modelOptions[0] = batch
+    modelOptions[1] = epochNum === 1 ? epochNum : epochNum-1
+    modelOptions[2] = rateNumber
+    modelOptions[3] = neuronNumber
+    modelOptions[4] = testNumber
+  }
+
+  const modelOptions : number[] = new Array(5)
   const [batch, setBatchValue] = useState(16)
   const [showBatchTooltip, setShowBatchTooltip] = useState(false)
   const [epochNum, setEpochValue] = useState(161)
   const [showEpochTooltip, setShowEpochTooltip] = useState(false)
   const [testNumber, setTestNumber] = useState(0)
   const [showTestTooltip, setShowTestTooltip] = useState(false)
+  const [neuronNumber, setNeuronNumber] = useState(16)
+  const [showNeuronTooltip, setShowNeuronTooltip] = useState(false)
+  const [rateNumber, setRateNumber] = useState(0.1)
+  const [showRateTooltip, setShowRateTooltip] = useState(false)
   const [advancedOptionsEnabled, setAdvancedOptionsEnabled] = useState(false)
   const handleModelClear = useStore((s) => s.modelClear)
 
@@ -210,6 +223,65 @@ const DataSamplesPage = () => {
                   </VStack>) : (<></>)}
                 </VStack>
                 <VStack>
+                {advancedOptionsEnabled ? (
+                  <VStack>
+                  <Text>Learning Rate</Text>
+                  <Slider 
+                    id = "RateSlider"
+                    defaultValue={0.1} 
+                    width = "175px" 
+                    min = {0.1} 
+                    max = {1}
+                    step = {0.1}
+                    colorScheme="blue"
+                    onMouseEnter={() => setShowRateTooltip(true)}
+                    onMouseLeave={() => setShowRateTooltip(false)}
+                    onChange={(val) => setRateNumber(Number(val))}>
+                    <SliderTrack>
+                      <SliderFilledTrack />
+                    </SliderTrack>
+                    <Tooltip
+                      hasArrow
+                      bg = "blue.500"
+                      color="white"
+                      placement="top"
+                      isOpen={showRateTooltip}
+                      label = {rateNumber}>
+                        <SliderThumb/>
+                      </Tooltip>
+                  </Slider>
+                  </VStack>) : (<></>)}
+                </VStack>
+                <VStack>
+                {advancedOptionsEnabled ? (
+                  <VStack>
+                  <Text>Neuron Number</Text>
+                  <Slider 
+                    id = "NeuronSlider"
+                    defaultValue={16} 
+                    width = "175px" 
+                    min = {1} 
+                    max = {100}
+                    colorScheme="blue"
+                    onMouseEnter={() => setShowNeuronTooltip(true)}
+                    onMouseLeave={() => setShowNeuronTooltip(false)}
+                    onChange={(val) => setNeuronNumber(Number(val))}>
+                    <SliderTrack>
+                      <SliderFilledTrack />
+                    </SliderTrack>
+                    <Tooltip
+                      hasArrow
+                      bg = "blue.500"
+                      color="white"
+                      placement="top"
+                      isOpen={showNeuronTooltip}
+                      label = {neuronNumber}>
+                        <SliderThumb/>
+                      </Tooltip>
+                  </Slider>
+                  </VStack>) : (<></>)}
+                </VStack>
+                <VStack>
                   {advancedOptionsEnabled ? (
                   <VStack>
                   <Text>No. Testing Samples</Text>
@@ -242,7 +314,7 @@ const DataSamplesPage = () => {
                 <Button
                   ref={trainButtonRef}
                   className={tourElClassname.trainModelButton}
-                  onClick={() => {setTestNums(testNumber); trainModelFlowStart(batch,epochNum===1 ? epochNum : epochNum-1,testNumber, handleNavigateToModel)}}
+                  onClick={() => {setTestNums(testNumber); upDateModelOptions(); trainModelFlowStart(modelOptions, handleNavigateToModel)}}
                   variant={hasSufficientData ? "primary" : "secondary-disabled"}
                 >
                   <FormattedMessage id="train-model" />
