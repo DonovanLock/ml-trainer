@@ -228,7 +228,7 @@ const DataSamplesPage = () => {
                     width = "175px" 
                     min = {0.1} 
                     max = {1}
-                    step = {0.1}
+                    step = {0.05}
                     colorScheme="blue"
                     onMouseEnter={() => setShowRateTooltip(true)}
                     onMouseLeave={() => setShowRateTooltip(false)}
