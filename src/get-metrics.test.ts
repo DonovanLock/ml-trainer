@@ -40,7 +40,7 @@ const getModelResults = (data: ActionData[]) => {
 
   if (trainingResult.error) {
     throw Error("No model returned");
-  };
+  }
 
   const tensorFlowResult = trainingResult.model.evaluate(
     tf.tensor(features),
@@ -85,8 +85,8 @@ const getMetrics = (dataset: number) => {
         if (result.indexOf(Math.max(...result)) == labels[j].indexOf(Math.max(...labels[j]))) {
             totalCorrectConfidence += result[labels[j].indexOf(Math.max(...labels[j]))];
             correctGuesses += 1;
-        };
-    };
+        }
+    }
     meanConfidence[dataset] += totalConfidence / (tensorflowPredictionResult.length / d);
     if (correctGuesses != 0) meanCorrectConfidence[dataset] += totalCorrectConfidence / correctGuesses;
 };
@@ -99,7 +99,7 @@ for (let i = 0; i < runs; i++) {
 	test("", () => getMetrics(2));
 	test("", () => getMetrics(3));
 	test("", () => getMetrics(4));
-};
+}
 
 afterAll(() => {
 	accuracy = accuracy.map(x => +(x / runs).toFixed(4));
