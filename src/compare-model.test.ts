@@ -67,7 +67,7 @@ beforeAll(async () => {
     await tf.setBackend("cpu");
     trainingResult = await trainModel(  
         fixUpTestData(trainingData),
-        currentDataWindow
+        currentDataWindow, [16,160,0.1,16,0]
     );
 });
 
@@ -79,7 +79,7 @@ const getModelResults = (data: ActionData[]) => {
 
   if (trainingResult.error) {
     throw Error("No model returned");
-  };
+  }
 
   const tensorFlowResult = trainingResult.model.evaluate(
     tf.tensor(features),
@@ -132,8 +132,8 @@ const compareModel = (message: string, dataset: number) => {
                 if (result.indexOf(Math.max(...result)) == labels[j].indexOf(Math.max(...labels[j]))) {
                     totalCorrectConfidence += result[labels[j].indexOf(Math.max(...labels[j]))];
                     correctGuesses += 1;
-                };
-            };
+                }
+            }
             accuracy = +tensorFlowResultAccuracy;
             meanConfidence = totalConfidence / (tensorflowPredictionResult.length / d);
             if (correctGuesses != 0) meanCorrectConfidence = totalCorrectConfidence / correctGuesses;
@@ -202,7 +202,7 @@ afterAll(() => {
     fs.writeFile("comparisonLog.txt", lines.join("\n"), (err) => {
         if (err) {
             return console.error("Error writing to comparisonLog.txt: ", err);
-        };
+        }
         console.log("Details written to comparisonLog.txt.");
     });
 });
