@@ -32,7 +32,7 @@ beforeAll(async () => {
   await tf.setBackend("cpu");
   trainingResult = await trainModel(
     fixUpTestData(actionData),
-    currentDataWindow, 16, 160
+    currentDataWindow, [16,160,0.1,16,0]
   );
 });
 
