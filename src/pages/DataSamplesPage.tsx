@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: MIT
  */
 import { Button, Flex, HStack, VStack, Checkbox, Text, Slider, SliderTrack, SliderFilledTrack, SliderThumb, Tooltip} from "@chakra-ui/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { RiAddLine, RiArrowRightLine } from "react-icons/ri";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useNavigate } from "react-router";
@@ -25,29 +25,25 @@ import { createTestingModelPageUrl } from "../urls";
 const DataSamplesPage = () => {
   const actions = useStore((s) => s.actions);
   const addNewAction = useStore((s) => s.addNewAction);
-  var model = useStore((s) => s.model);
+  const model = useStore((s) => s.model);
   const [selectedActionIdx, setSelectedActionIdx] = useState<number>(0);
 
   const navigate = useNavigate();
   const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
 
-  const findMaxTestSize = () => {
-    var min = 0
-    if (actions.length > 0){
-      min = actions[0].recordings.length - 3
-      for (let i = 1; i < actions.length; i++){
-        const temp = actions[i].recordings.length - 3
-        if (temp >= 0 && temp < min){
-          min = temp
+  const maxTestSize = useMemo(() => {
+    let min = 0;
+    if (actions.length > 0) {
+      min = actions[0].recordings.length - 3;
+      for (let i = 1; i < actions.length; i++) {
+        const temp = actions[i].recordings.length - 3;
+        if (temp >= 0 && temp < min) {
+          min = temp;
         }
       }
     }
-    if (testNumber > min){
-      setTestNumber(min)
-      setTestNums(min)
-    }
-    return min
-  }
+    return Math.max(min, 1);
+  }, [actions]);
   
   const setTestNums = (val : number) => {
     for (let i = 0; i < actions.length; i++){
@@ -290,7 +286,7 @@ const DataSamplesPage = () => {
                     defaultValue={0} 
                     width = "175px" 
                     min = {0} 
-                    max = {Math.max(findMaxTestSize(),1)}
+                    max = {maxTestSize}
                     colorScheme="blue"
                     onMouseEnter={() => setShowTestTooltip(true)}
                     onMouseLeave={() => setShowTestTooltip(false)}
@@ -315,6 +311,7 @@ const DataSamplesPage = () => {
                   ref={trainButtonRef}
                   className={tourElClassname.trainModelButton}
                   onClick={() => {setTestNums(testNumber); upDateModelOptions(); trainModelFlowStart(modelOptions, handleNavigateToModel)}}
+
                   variant={hasSufficientData ? "primary" : "secondary-disabled"}
                 >
                   <FormattedMessage id="train-model" />
