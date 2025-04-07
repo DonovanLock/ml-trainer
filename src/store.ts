@@ -17,7 +17,7 @@ import {
   generateCustomFiles,
   generateProject,
 } from "./makecode/utils";
-import { Confidences, predict, trainModel } from "./ml";
+import { Confidences, predict, trainModel, prepareFeaturesAndLabels} from "./ml";
 import {
   DataSamplesView,
   DownloadState,
@@ -53,6 +53,8 @@ const createFirstAction = () => ({
   ID: Date.now(),
   name: "",
   recordings: [],
+  testsPassed: 100,
+  testNumber: 0
 });
 
 export interface DataWindow {
@@ -81,6 +83,74 @@ interface PredictionResult {
   confidences: Confidences;
   detected: Action | undefined;
 }
+
+function removeTestData(actions : ActionData[], testNumber : number) : ActionData[] {
+  const numActions = actions.length
+  const actions1 : ActionData[] = Array(numActions).fill(null).map(() => ({} as ActionData))
+  for (let i = 0; i < numActions; i ++ ){
+    let j : number = 0
+    actions1[i] = ({
+      icon: actions[i].icon,
+      ID: actions[i].ID,
+      name: actions[i].name,
+      recordings: [],
+      testsPassed: actions[i].testsPassed,
+      testNumber: actions[i].testNumber,
+    })
+    while (j < testNumber){
+      j++
+    }
+    while(j < actions[i].recordings.length){
+      actions1[i].recordings = actions1[i].recordings.concat([actions[i].recordings[j]])
+      j++
+    }
+  }
+  return actions1
+}
+
+function removeTrainingData(actions : ActionData[], testNumber : number) : ActionData[] {
+  const numActions = actions.length
+  const actions1 : ActionData[] = Array(numActions).fill(null).map(() => ({} as ActionData))
+  for (let i = 0; i < numActions; i ++ ){
+    let j : number = 0
+    actions1[i] = ({
+      icon: actions[i].icon,
+      ID: actions[i].ID,
+      name: actions[i].name,
+      recordings: [],
+      testsPassed: actions[i].testsPassed,
+      testNumber: actions[i].testNumber
+    })
+    while (j < testNumber){
+      actions1[i].recordings = actions1[i].recordings.concat([actions[i].recordings[j]])
+      j++
+    }
+  }
+  return actions1
+}
+
+const getModelResults = (data: ActionData[], model : tf.LayersModel) => {
+  const { features, labels } = prepareFeaturesAndLabels(
+    data,
+    currentDataWindow
+  );
+
+  // const tensorFlowResult = model.evaluate(
+  //   tf.tensor(features),
+  //   tf.tensor(labels)
+  // );
+  //const tensorFlowResultAccuracy = (tensorFlowResult as tf.Scalar[])[1]
+    //.dataSync()[0]
+    //.toFixed(4);
+  const tensorflowPredictionResult = (
+    model.predict(tf.tensor(features)) as tf.Tensor
+  ).dataSync();
+  return {
+    //tensorFlowResultAccuracy,
+    tensorflowPredictionResult,
+    labels,
+  };
+};
 
 const createUntitledProject = (): MakeCodeProject => ({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -213,8 +283,10 @@ export interface Actions {
   setActionIcon(id: ActionData["ID"], icon: MakeCodeIcon): void;
   setRequiredConfidence(id: ActionData["ID"], value: number): void;
   deleteActionRecording(id: ActionData["ID"], recordingIdx: number): void;
+  changeSlider() : void;
   deleteAllActions(): void;
   downloadDataset(): void;
+  modelClear() : void;
 
   dataCollectionMicrobitConnectionStart(options?: ConnectOptions): void;
   dataCollectionMicrobitConnected(): void;
@@ -225,9 +297,10 @@ export interface Actions {
   recordingStarted(): void;
   recordingStopped(): void;
   newSession(projectName?: string): void;
-  trainModelFlowStart: (callback?: () => void) => Promise<void>;
+  trainModelFlowStart: (modelOptions: number[], callback?: () => void) => Promise<void>;
   closeTrainModelDialogs: () => void;
-  trainModel(): Promise<boolean>;
+  trainModel(modelOptions : number[]): Promise<boolean>;
+  testModel(testNumber : number, model : tf.LayersModel): void;
   setSettings(update: Partial<Settings>): void;
   setLanguage(languageId: string): void;
 
@@ -439,6 +512,8 @@ const createMlStore = (logging: Logging) => {
                   ID: Date.now(),
                   name: "",
                   recordings: [],
+                  testsPassed: 100,
+                  testNumber : 0
                 },
               ];
               return {
@@ -453,6 +528,21 @@ const createMlStore = (logging: Logging) => {
                 ),
               };
             });
+          },
+
+          modelClear() {
+            return set(({project, projectEdited, actions, dataWindow}) => {
+              return{
+                model : undefined,
+                ...updateProject(
+                  project,
+                  projectEdited,
+                  actions,
+                  undefined,
+                  dataWindow,
+                ),
+              }
+            })
           },
 
           addActionRecordings(id: ActionData["ID"], recs: RecordingData[]) {
@@ -598,6 +688,21 @@ const createMlStore = (logging: Logging) => {
             });
           },
 
+          changeSlider(){
+            return set(({project, projectEdited, actions, dataWindow}) => {
+              return {
+                model : undefined,
+                ...updateProject(
+                  project,
+                  projectEdited,
+                  actions,
+                  undefined,
+                  dataWindow
+                ),
+              }
+            })
+          },
+
           deleteAllActions() {
             return set(({ project, projectEdited }) => ({
               actions: [createFirstAction()],
@@ -698,13 +803,13 @@ const createMlStore = (logging: Logging) => {
             });
           },
 
-          async trainModelFlowStart(callback?: () => void) {
+          async trainModelFlowStart(modelOptions, callback?: () => void) {
             const {
               settings: { showPreTrainHelp },
               actions,
               trainModel,
             } = get();
-            if (!hasSufficientDataForTraining(actions)) {
+            if (!hasSufficientDataForTraining(actions, modelOptions[4])) {
               set({
                 trainModelDialogStage: TrainModelDialogStage.InsufficientData,
               });
@@ -713,13 +818,38 @@ const createMlStore = (logging: Logging) => {
                 trainModelDialogStage: TrainModelDialogStage.Help,
               });
             } else {
-              await trainModel();
+              await trainModel(modelOptions);
               callback?.();
+            }
+             
+          },
+
+          testModel(testNumber, model){
+            const {
+              actions,
+            } = get()
+            const actions1 = removeTrainingData(actions, testNumber)
+            const correctPredictions : number[] = new Array<number>(actions.length)
+            correctPredictions.fill(0,0,actions.length)
+            const {
+              tensorflowPredictionResult,
+              labels,
+            } = getModelResults(actions1, model)
+            const d = labels[0].length
+            for (let i = 0, j = 0; i < tensorflowPredictionResult.length; i += d, j ++){
+              const result = tensorflowPredictionResult.slice(i , i+d)
+              if (result.indexOf(Math.max(...result)) === labels[j].indexOf(Math.max(...labels[j]))){
+                correctPredictions[labels[j].indexOf(Math.max(...labels[j]))]++
+              }
+            }
+            for (let i = 0; i < actions.length; i++){
+              actions[i].testsPassed = correctPredictions[i]
+              actions[i].testNumber = testNumber
             }
           },
 
-          async trainModel() {
-            const { actions, dataWindow } = get();
+          async trainModel(modelOptions) {
+            const { actions, dataWindow, testModel } = get();
             logging.event({
               type: "model-train",
               detail: {
@@ -728,6 +858,7 @@ const createMlStore = (logging: Logging) => {
               },
             });
             const actionName = "trainModel";
+            const actions1 = removeTestData(actions, modelOptions[4]);
             set({
               trainModelDialogStage: TrainModelDialogStage.TrainingInProgress,
               trainModelProgress: 0,
@@ -736,14 +867,26 @@ const createMlStore = (logging: Logging) => {
             // can block the UI. 50 ms is not sufficient, so use 100 for now.
             await new Promise((res) => setTimeout(res, 100));
             const trainingResult = await trainModel(
-              actions,
-              dataWindow,
+              actions1,
+              dataWindow, modelOptions,
               (trainModelProgress) =>
                 set({ trainModelProgress }, false, "trainModelProgress")
             );
-            const model = trainingResult.error
-              ? undefined
-              : trainingResult.model;
+            //const model = trainingResult.error ? undefined : trainingResult.model
+            let model1: tf.LayersModel | undefined = undefined
+            if (!trainingResult.error){
+              model1 = trainingResult.model
+              if (modelOptions[4] > 0){
+                testModel(modelOptions[4], model1)
+              }
+              else{
+                for (let i = 0; i < actions.length; i++){
+                  actions[i].testsPassed = 0
+                  actions[i].testNumber = 0
+                }
+              }
+            }
+            const model = model1
             set(
               ({ project, projectEdited }) => ({
                 model,
@@ -1318,13 +1461,13 @@ export const useHasActions = () => {
   );
 };
 
-const hasSufficientDataForTraining = (actions: ActionData[]): boolean => {
-  return actions.length >= 2 && actions.every((a) => a.recordings.length >= 3);
+const hasSufficientDataForTraining = (actions: ActionData[], testNumber : number): boolean => {
+  return actions.length >= 2 && actions.every((a) => a.recordings.length - testNumber >= 3);
 };
 
-export const useHasSufficientDataForTraining = (): boolean => {
+export const useHasSufficientDataForTraining = (testNumber : number): boolean => {
   const actions = useStore((s) => s.actions);
-  return hasSufficientDataForTraining(actions);
+  return hasSufficientDataForTraining(actions, testNumber);
 };
 
 export const useHasNoStoredData = (): boolean => {

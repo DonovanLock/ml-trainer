@@ -27,9 +27,10 @@ import ActionNameCard from "./ActionNameCard";
 import CodeViewCard from "./CodeViewCard";
 import CodeViewDefaultBlockCard from "./CodeViewDefaultBlockCard";
 import HeadingGrid from "./HeadingGrid";
+import TestPassCard from "./TestPassPercentCard";
 
 const gridCommonProps: Partial<GridProps> = {
-  gridTemplateColumns: "290px 360px 40px auto",
+  gridTemplateColumns: "290px 200px 360px 40px auto",
   gap: 3,
   w: "100%",
 };
@@ -38,6 +39,10 @@ const headings = [
   {
     titleId: "action-label",
     descriptionId: "action-tooltip",
+  },
+  {
+    titleId: "Test Accuracy",
+    descriptionId: "Shows the number of samples that passed the test out of the number tested",
   },
   {
     titleId: "certainty-label",
@@ -102,6 +107,13 @@ const TestingModelTable = () => {
                       value={action}
                       readOnly={true}
                       disabled={!isConnected}
+                    />
+                  </GridItem>
+                  <GridItem>
+                    <TestPassCard
+                      value={action}
+                      readOnly={true}
+                      disabled={!isConnected} 
                     />
                   </GridItem>
                   <GridItem>
