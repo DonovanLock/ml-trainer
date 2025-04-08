@@ -14,7 +14,12 @@ import goodTestData from "./test-fixtures/comparison-data/test-data-good.json";
 import okTestData from "./test-fixtures/comparison-data/test-data-ok.json";
 import poorTestData from "./test-fixtures/comparison-data/test-data-poor.json";
 import worstTestData from "./test-fixtures/comparison-data/test-data-worst.json";
-import { prepareFeaturesAndLabels, TrainingResult, trainModel } from "./ml";
+import {
+  prepareFeaturesAndLabels,
+  TrainingResult,
+  trainModel,
+  defaultModelOptions,
+} from "./ml";
 import { currentDataWindow } from "./store";
 import { ActionData } from "./model";
 
@@ -29,7 +34,7 @@ beforeAll(async () => {
   trainingResult = await trainModel(
     fixUpTestData(trainingData),
     currentDataWindow,
-    [16, 160, 0.1, 16, 0]
+    defaultModelOptions
   );
 });
 

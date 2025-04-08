@@ -15,6 +15,7 @@ import {
   prepareFeaturesAndLabels,
   TrainingResult,
   trainModel,
+  defaultModelOptions,
 } from "./ml";
 import actionDataBadLabels from "./test-fixtures/shake-still-circle-legacy-bad-labels.json";
 import actionData from "./test-fixtures/shake-still-circle-data-samples-legacy.json";
@@ -33,7 +34,7 @@ beforeAll(async () => {
   trainingResult = await trainModel(
     fixUpTestData(actionData),
     currentDataWindow,
-    [16, 160, 0.1, 16, 0]
+    defaultModelOptions
   );
 });
 

@@ -33,6 +33,7 @@ import { keyboardShortcuts, useShortcut } from "../keyboard-shortcut-hooks";
 import { useHasSufficientDataForTraining, useStore } from "../store";
 import { tourElClassname } from "../tours";
 import { createTestingModelPageUrl } from "../urls";
+import { ModelOptions } from "../ml";
 
 const DataSamplesPage = () => {
   const actions = useStore((s) => s.actions);
@@ -57,26 +58,26 @@ const DataSamplesPage = () => {
     return Math.max(min, 1);
   }, [actions]);
 
-  const setTestNums = (val: number) => {
-    for (let i = 0; i < actions.length; i++) {
-      actions[i].testNumber = val;
-    }
-  };
-
   function upDateModelOptions(): void {
-    modelOptions[0] = batch;
-    modelOptions[1] = epochNum === 1 ? epochNum : epochNum - 1;
-    modelOptions[2] = rateNumber;
-    modelOptions[3] = neuronNumber;
-    modelOptions[4] = testNumber;
+    modelOptions.batchSize = batch;
+    modelOptions.epochs = epochNum === 1 ? epochNum - 1 : epochNum;
+    modelOptions.learningRate = rateNumber;
+    modelOptions.neuronNumber = neuronNumber;
+    modelOptions.testNumber = testNumber;
   }
 
-  const modelOptions: number[] = [16, 160, 0.1, 16, 0];
+  const modelOptions: ModelOptions = {
+    batchSize: 16,
+    epochs: 160,
+    learningRate: 0.1,
+    neuronNumber: 16,
+    testNumber: 0,
+  };
   const [batch, setBatchValue] = useState(16);
   const [showBatchTooltip, setShowBatchTooltip] = useState(false);
   const [epochNum, setEpochValue] = useState(161);
   const [showEpochTooltip, setShowEpochTooltip] = useState(false);
-  const [testNumber, setTestNumber] = useState(0);
+  const [testNumber, setTestNum] = useState(0);
   const [showTestTooltip, setShowTestTooltip] = useState(false);
   const [neuronNumber, setNeuronNumber] = useState(16);
   const [showNeuronTooltip, setShowNeuronTooltip] = useState(false);
@@ -84,6 +85,7 @@ const DataSamplesPage = () => {
   const [showRateTooltip, setShowRateTooltip] = useState(false);
   const [advancedOptionsEnabled, setAdvancedOptionsEnabled] = useState(false);
   const handleModelClear = useStore((s) => s.modelClear);
+  const setTestNumber = useStore((s) => s.setTestNumber);
 
   const tourStart = useStore((s) => s.tourStart);
   const { isConnected } = useConnectionStage();
@@ -319,10 +321,7 @@ const DataSamplesPage = () => {
                           colorScheme="blue"
                           onMouseEnter={() => setShowTestTooltip(true)}
                           onMouseLeave={() => setShowTestTooltip(false)}
-                          onChange={(val) => {
-                            setTestNumber(Number(val));
-                            setTestNums(Number(val));
-                          }}
+                          onChange={(val) => setTestNum(Number(val))}
                         >
                           <SliderTrack>
                             <SliderFilledTrack />
@@ -354,7 +353,7 @@ const DataSamplesPage = () => {
                     ref={trainButtonRef}
                     className={tourElClassname.trainModelButton}
                     onClick={() => {
-                      setTestNums(testNumber);
+                      setTestNumber(testNumber);
                       upDateModelOptions();
                       void trainModelFlowStart(
                         modelOptions,

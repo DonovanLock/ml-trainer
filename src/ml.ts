@@ -14,10 +14,26 @@ export type TrainingResult =
   | { error: false; model: tf.LayersModel }
   | { error: true };
 
+export interface ModelOptions {
+  epochs: number;
+  batchSize: number;
+  learningRate: number;
+  neuronNumber: number;
+  testNumber: number;
+}
+
+export const defaultModelOptions: ModelOptions = {
+  epochs: 160,
+  batchSize: 16,
+  learningRate: 0.1,
+  neuronNumber: 16,
+  testNumber: 0,
+};
+
 export const trainModel = async (
   data: ActionData[],
   dataWindow: DataWindow,
-  modelOptions: number[],
+  modelOptions: ModelOptions,
   onProgress?: (progress: number) => void
 ): Promise<TrainingResult> => {
   const { features, labels } = prepareFeaturesAndLabels(data, dataWindow);
@@ -25,8 +41,8 @@ export const trainModel = async (
 
   try {
     await model.fit(tf.tensor(features), tf.tensor(labels), {
-      epochs: modelOptions[1],
-      batchSize: modelOptions[0],
+      epochs: modelOptions.epochs,
+      batchSize: modelOptions.batchSize,
       shuffle: true,
       // We don't do anything with the validation data, so might
       // as well train using all of it.
@@ -34,7 +50,7 @@ export const trainModel = async (
       callbacks: {
         onEpochEnd: (epoch: number) => {
           // Epochs indexed at 0
-          onProgress && onProgress(epoch / (modelOptions[1] - 1));
+          onProgress && onProgress(epoch / (modelOptions.epochs - 1));
         },
       },
     });
@@ -70,7 +86,7 @@ export const prepareFeaturesAndLabels = (
 
 const createModel = (
   actions: ActionData[],
-  modelOptions: number[]
+  modelOptions: ModelOptions
 ): tf.LayersModel => {
   const numberOfClasses: number = actions.length;
   const inputShape = [
@@ -80,7 +96,7 @@ const createModel = (
   const input = tf.input({ shape: inputShape });
   const normalizer = tf.layers.batchNormalization().apply(input);
   const dense = tf.layers
-    .dense({ units: modelOptions[3], activation: "relu" })
+    .dense({ units: modelOptions.neuronNumber, activation: "relu" })
     .apply(normalizer);
   const softmax = tf.layers
     .dense({ units: numberOfClasses, activation: "softmax" })
@@ -89,7 +105,7 @@ const createModel = (
 
   model.compile({
     loss: "categoricalCrossentropy",
-    optimizer: tf.train.sgd(modelOptions[2]),
+    optimizer: tf.train.sgd(modelOptions.learningRate),
     metrics: ["accuracy"],
   });
 

@@ -22,6 +22,7 @@ import {
   predict,
   trainModel,
   prepareFeaturesAndLabels,
+  ModelOptions,
 } from "./ml";
 import {
   DataSamplesView,
@@ -301,6 +302,8 @@ export interface Actions {
   setActionName(id: ActionData["ID"], name: string): void;
   setActionIcon(id: ActionData["ID"], icon: MakeCodeIcon): void;
   setRequiredConfidence(id: ActionData["ID"], value: number): void;
+  setTestNumber(value: number): void;
+  setTestsPassed(values: number[]): void;
   deleteActionRecording(id: ActionData["ID"], recordingIdx: number): void;
   changeSlider(): void;
   deleteAllActions(): void;
@@ -317,11 +320,11 @@ export interface Actions {
   recordingStopped(): void;
   newSession(projectName?: string): void;
   trainModelFlowStart: (
-    modelOptions: number[],
+    modelOptions: ModelOptions,
     callback?: () => void
   ) => Promise<void>;
   closeTrainModelDialogs: () => void;
-  trainModel(modelOptions: number[]): Promise<boolean>;
+  trainModel(modelOptions: ModelOptions): Promise<boolean>;
   testModel(testNumber: number, model: tf.LayersModel): void;
   setSettings(update: Partial<Settings>): void;
   setLanguage(languageId: string): void;
@@ -678,6 +681,48 @@ const createMlStore = (logging: Logging) => {
             );
           },
 
+          setTestNumber(value: number) {
+            return set(
+              ({ project, projectEdited, actions, model, dataWindow }) => {
+                const newActions = actions;
+                for (let i = 0; i < actions.length; i++) {
+                  newActions[i].testNumber = value;
+                }
+                return {
+                  actions: newActions,
+                  ...updateProject(
+                    project,
+                    projectEdited,
+                    newActions,
+                    model,
+                    dataWindow
+                  ),
+                };
+              }
+            );
+          },
+
+          setTestsPassed(values: number[]) {
+            return set(
+              ({ project, projectEdited, actions, model, dataWindow }) => {
+                const newActions = actions;
+                for (let i = 0; i < actions.length; i++) {
+                  newActions[i].testsPassed = values[i];
+                }
+                return {
+                  actions: newActions,
+                  ...updateProject(
+                    project,
+                    projectEdited,
+                    newActions,
+                    model,
+                    dataWindow
+                  ),
+                };
+              }
+            );
+          },
+
           deleteActionRecording(id: ActionData["ID"], recordingIdx: number) {
             return set(({ project, projectEdited, actions, dataWindow }) => {
               const newActions = actions.map((action) => {
@@ -831,7 +876,9 @@ const createMlStore = (logging: Logging) => {
               actions,
               trainModel,
             } = get();
-            if (!hasSufficientDataForTraining(actions, modelOptions[4])) {
+            if (
+              !hasSufficientDataForTraining(actions, modelOptions.testNumber)
+            ) {
               set({
                 trainModelDialogStage: TrainModelDialogStage.InsufficientData,
               });
@@ -870,10 +917,7 @@ const createMlStore = (logging: Logging) => {
                 correctPredictions[labels[j].indexOf(Math.max(...labels[j]))]++;
               }
             }
-            for (let i = 0; i < actions.length; i++) {
-              actions[i].testsPassed = correctPredictions[i];
-              actions[i].testNumber = testNumber;
-            }
+            this.setTestsPassed(correctPredictions);
           },
 
           async trainModel(modelOptions) {
@@ -886,7 +930,7 @@ const createMlStore = (logging: Logging) => {
               },
             });
             const actionName = "trainModel";
-            const actions1 = removeTestData(actions, modelOptions[4]);
+            const actions1 = removeTestData(actions, modelOptions.testNumber);
             set({
               trainModelDialogStage: TrainModelDialogStage.TrainingInProgress,
               trainModelProgress: 0,
@@ -905,8 +949,8 @@ const createMlStore = (logging: Logging) => {
             let model1: tf.LayersModel | undefined = undefined;
             if (!trainingResult.error) {
               model1 = trainingResult.model;
-              if (modelOptions[4] > 0) {
-                testModel(modelOptions[4], model1);
+              if (modelOptions.testNumber > 0) {
+                testModel(modelOptions.testNumber, model1);
               } else {
                 for (let i = 0; i < actions.length; i++) {
                   actions[i].testsPassed = 0;

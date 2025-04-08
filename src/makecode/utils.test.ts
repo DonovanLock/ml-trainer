@@ -11,7 +11,7 @@
 import { MakeCodeProject } from "@microbit/makecode-embed/react";
 import * as tf from "@tensorflow/tfjs";
 import { assert, vi } from "vitest";
-import { TrainingResult, trainModel } from "../ml";
+import { TrainingResult, trainModel, defaultModelOptions } from "../ml";
 import { DatasetEditorJsonFormat, ActionData } from "../model";
 import oldProject from "../test-fixtures/project-to-update.json";
 import actionData from "../test-fixtures/still-wave-clap-data-samples-legacy.json";
@@ -45,7 +45,7 @@ beforeAll(async () => {
   trainingResult = await trainModel(
     actionData as ActionData[],
     currentDataWindow,
-    [16, 160, 0.1, 16, 0]
+    defaultModelOptions
   );
 });
 

@@ -37,7 +37,12 @@
 
 import * as tf from "@tensorflow/tfjs";
 import * as fs from "fs";
-import { prepareFeaturesAndLabels, TrainingResult, trainModel } from "./ml";
+import {
+  prepareFeaturesAndLabels,
+  TrainingResult,
+  trainModel,
+  defaultModelOptions,
+} from "./ml";
 import { ActionData } from "./model";
 import { currentDataWindow } from "./store";
 import trainingData from "./test-fixtures/comparison-data/training-data.json";
@@ -64,7 +69,7 @@ beforeAll(async () => {
   trainingResult = await trainModel(
     fixUpTestData(trainingData),
     currentDataWindow,
-    [16, 160, 0.1, 16, 0]
+    defaultModelOptions
   );
 });
 
