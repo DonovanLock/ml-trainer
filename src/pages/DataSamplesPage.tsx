@@ -310,7 +310,7 @@ const DataSamplesPage = () => {
                 <Button
                   ref={trainButtonRef}
                   className={tourElClassname.trainModelButton}
-                  onClick={() => {setTestNums(testNumber); upDateModelOptions(); trainModelFlowStart(modelOptions, handleNavigateToModel)}}
+                  onClick={() => {setTestNums(testNumber); upDateModelOptions(); void trainModelFlowStart(modelOptions, handleNavigateToModel)}}
 
                   variant={hasSufficientData ? "primary" : "secondary-disabled"}
                 >
