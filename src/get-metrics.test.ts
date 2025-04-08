@@ -2,7 +2,7 @@
  * This file is simply used to get accuracy/confidence
  * data for our model. We use these to provide the basis
  * for the compare-model.test.ts file.
- * 
+ *
  * It's not pretty, but writing this as a test was the
  * only way I could get it to work for the time being :)
  */
@@ -25,11 +25,12 @@ const fixUpTestData = (data: Partial<ActionData>[]): ActionData[] => {
 
 let trainingResult: TrainingResult;
 beforeAll(async () => {
-    await tf.setBackend("cpu");
-    trainingResult = await trainModel(  
-        fixUpTestData(trainingData),
-        currentDataWindow, [16,160,0.1,16,0]
-    );
+  await tf.setBackend("cpu");
+  trainingResult = await trainModel(
+    fixUpTestData(trainingData),
+    currentDataWindow,
+    [16, 160, 0.1, 16, 0]
+  );
 });
 
 const getModelResults = (data: ActionData[]) => {
@@ -60,11 +61,11 @@ const getModelResults = (data: ActionData[]) => {
 };
 
 const testData = [
-	fixUpTestData(bestTestData),
-	fixUpTestData(goodTestData),
-	fixUpTestData(okTestData),
-	fixUpTestData(poorTestData),
-    fixUpTestData(worstTestData)
+  fixUpTestData(bestTestData),
+  fixUpTestData(goodTestData),
+  fixUpTestData(okTestData),
+  fixUpTestData(poorTestData),
+  fixUpTestData(worstTestData),
 ];
 
 let accuracy: number[] = [0, 0, 0, 0, 0];
@@ -72,40 +73,48 @@ let meanConfidence: number[] = [0, 0, 0, 0, 0];
 let meanCorrectConfidence: number[] = [0, 0, 0, 0, 0];
 
 const getMetrics = (dataset: number) => {
-    const { tensorFlowResultAccuracy, tensorflowPredictionResult, labels } =
-        getModelResults(testData[dataset]);
-    accuracy[dataset] += +tensorFlowResultAccuracy;
-    const d = labels[0].length;
-    let totalConfidence: number = 0;
-    let totalCorrectConfidence: number = 0;
-    let correctGuesses: number = 0;
-    for (let i = 0, j = 0; i < tensorflowPredictionResult.length; i += d, j++) {
-        const result = tensorflowPredictionResult.slice(i, i + d);
-        totalConfidence += result[labels[j].indexOf(Math.max(...labels[j]))];
-        if (result.indexOf(Math.max(...result)) == labels[j].indexOf(Math.max(...labels[j]))) {
-            totalCorrectConfidence += result[labels[j].indexOf(Math.max(...labels[j]))];
-            correctGuesses += 1;
-        }
+  const { tensorFlowResultAccuracy, tensorflowPredictionResult, labels } =
+    getModelResults(testData[dataset]);
+  accuracy[dataset] += +tensorFlowResultAccuracy;
+  const d = labels[0].length;
+  let totalConfidence: number = 0;
+  let totalCorrectConfidence: number = 0;
+  let correctGuesses: number = 0;
+  for (let i = 0, j = 0; i < tensorflowPredictionResult.length; i += d, j++) {
+    const result = tensorflowPredictionResult.slice(i, i + d);
+    totalConfidence += result[labels[j].indexOf(Math.max(...labels[j]))];
+    if (
+      result.indexOf(Math.max(...result)) ==
+      labels[j].indexOf(Math.max(...labels[j]))
+    ) {
+      totalCorrectConfidence +=
+        result[labels[j].indexOf(Math.max(...labels[j]))];
+      correctGuesses += 1;
     }
-    meanConfidence[dataset] += totalConfidence / (tensorflowPredictionResult.length / d);
-    if (correctGuesses != 0) meanCorrectConfidence[dataset] += totalCorrectConfidence / correctGuesses;
+  }
+  meanConfidence[dataset] +=
+    totalConfidence / (tensorflowPredictionResult.length / d);
+  if (correctGuesses != 0)
+    meanCorrectConfidence[dataset] += totalCorrectConfidence / correctGuesses;
 };
 
 const runs = 10;
 
 for (let i = 0; i < runs; i++) {
-	test("", () => getMetrics(0));
-	test("", () => getMetrics(1));
-	test("", () => getMetrics(2));
-	test("", () => getMetrics(3));
-	test("", () => getMetrics(4));
+  test("", () => getMetrics(0));
+  test("", () => getMetrics(1));
+  test("", () => getMetrics(2));
+  test("", () => getMetrics(3));
+  test("", () => getMetrics(4));
 }
 
 afterAll(() => {
-	accuracy = accuracy.map(x => +(x / runs).toFixed(4));
-	meanConfidence = meanConfidence.map(x => +(x / runs).toFixed(4));
-	meanCorrectConfidence = meanCorrectConfidence.map(x => +(x / runs).toFixed(4));
-    console.log(accuracy);
-    console.log(meanConfidence);
-    console.log(meanCorrectConfidence);
+  accuracy = accuracy.map((x) => +(x / runs).toFixed(4));
+  meanConfidence = meanConfidence.map((x) => +(x / runs).toFixed(4));
+  meanCorrectConfidence = meanCorrectConfidence.map(
+    (x) => +(x / runs).toFixed(4)
+  );
+  console.log(accuracy);
+  console.log(meanConfidence);
+  console.log(meanCorrectConfidence);
 });

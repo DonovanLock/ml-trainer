@@ -44,7 +44,8 @@ beforeAll(async () => {
 
   trainingResult = await trainModel(
     actionData as ActionData[],
-    currentDataWindow, [16,160,0.1,16,0]
+    currentDataWindow,
+    [16, 160, 0.1, 16, 0]
   );
 });
 

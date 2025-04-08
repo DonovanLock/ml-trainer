@@ -42,7 +42,8 @@ const headings = [
   },
   {
     titleId: "Test Accuracy",
-    descriptionId: "Shows the number of samples that passed the test out of the number tested",
+    descriptionId:
+      "Shows the number of samples that passed the test out of the number tested",
   },
   {
     titleId: "certainty-label",
@@ -113,7 +114,7 @@ const TestingModelTable = () => {
                     <TestPassCard
                       value={action}
                       readOnly={true}
-                      disabled={!isConnected} 
+                      disabled={!isConnected}
                     />
                   </GridItem>
                   <GridItem>

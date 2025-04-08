@@ -1,5 +1,5 @@
 {
-    "originalAccuracy": [0.79, 0.91666, 0.94668, 0.9967, 1],
-    "originalConfidence": [0.71739, 0.88556, 0.91899, 0.97239, 0.98774],
-    "originalCorrectConfidence": [0.86519, 0.94464, 0.95239, 0.97414, 0.98774]
+  "originalAccuracy": [0.79, 0.91666, 0.94668, 0.9967, 1],
+  "originalConfidence": [0.71739, 0.88556, 0.91899, 0.97239, 0.98774],
+  "originalCorrectConfidence": [0.86519, 0.94464, 0.95239, 0.97414, 0.98774]
 }

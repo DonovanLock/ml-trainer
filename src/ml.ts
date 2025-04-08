@@ -17,7 +17,7 @@ export type TrainingResult =
 export const trainModel = async (
   data: ActionData[],
   dataWindow: DataWindow,
-  modelOptions : number[],
+  modelOptions: number[],
   onProgress?: (progress: number) => void
 ): Promise<TrainingResult> => {
   const { features, labels } = prepareFeaturesAndLabels(data, dataWindow);
@@ -68,7 +68,10 @@ export const prepareFeaturesAndLabels = (
   return { features, labels };
 };
 
-const createModel = (actions: ActionData[], modelOptions: number[]): tf.LayersModel => {
+const createModel = (
+  actions: ActionData[],
+  modelOptions: number[]
+): tf.LayersModel => {
   const numberOfClasses: number = actions.length;
   const inputShape = [
     mlSettings.includedFilters.size * mlSettings.includedAxes.length,
