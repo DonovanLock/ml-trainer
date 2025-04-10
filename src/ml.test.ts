@@ -15,12 +15,11 @@ import {
   prepareFeaturesAndLabels,
   TrainingResult,
   trainModel,
-  defaultModelOptions,
 } from "./ml";
 import actionDataBadLabels from "./test-fixtures/shake-still-circle-legacy-bad-labels.json";
 import actionData from "./test-fixtures/shake-still-circle-data-samples-legacy.json";
 import testData from "./test-fixtures/shake-still-circle-legacy-test-data.json";
-import { currentDataWindow } from "./store";
+import { currentDataWindow, defaultModelOptions } from "./store";
 
 const fixUpTestData = (data: Partial<ActionData>[]): ActionData[] => {
   data.forEach((action) => (action.icon = "Heart"));
@@ -41,7 +40,8 @@ beforeAll(async () => {
 const getModelResults = (data: ActionData[]) => {
   const { features, labels } = prepareFeaturesAndLabels(
     data,
-    currentDataWindow
+    currentDataWindow,
+    defaultModelOptions
   );
 
   if (trainingResult.error) {
@@ -107,7 +107,7 @@ describe("applyFilters", () => {
   test("throws when x/y/z data is empty", () => {
     const xyzData = { x: [], y: [], z: [] };
     try {
-      applyFilters(xyzData, currentDataWindow);
+      applyFilters(xyzData, currentDataWindow, defaultModelOptions);
       // Fail test if above expression doesn't throw anything.
       expect(true).toBe(false);
     } catch (e) {
@@ -117,7 +117,7 @@ describe("applyFilters", () => {
   test("throws when data sample is too short", () => {
     const xyzData = { x: [1, 1, 1], y: [1, 1, 1], z: [1, 1, 1] };
     try {
-      applyFilters(xyzData, currentDataWindow);
+      applyFilters(xyzData, currentDataWindow, defaultModelOptions);
       // Fail test if above expression doesn't throw anything.
       expect(true).toBe(false);
     } catch (e) {
@@ -130,7 +130,9 @@ describe("applyFilters", () => {
       y: new Array(44).fill(1),
       z: new Array(44).fill(1),
     };
-    expect(applyFilters(xyzData, currentDataWindow)).toEqual({
+    expect(
+      applyFilters(xyzData, currentDataWindow, defaultModelOptions)
+    ).toEqual({
       "acc-x": 50,
       "acc-y": 50,
       "acc-z": 50,
@@ -164,7 +166,9 @@ describe("applyFilters", () => {
       z: [0, 0, 0, 0, 0, 0, 0],
     };
     expect(
-      applyFilters(xyzData, currentDataWindow, { normalize: true })
+      applyFilters(xyzData, currentDataWindow, defaultModelOptions, {
+        normalize: true,
+      })
     ).toEqual({
       "acc-x": 0,
       "acc-y": 0,

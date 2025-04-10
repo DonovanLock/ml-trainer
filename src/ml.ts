@@ -8,27 +8,11 @@ import * as tf from "@tensorflow/tfjs";
 import { SymbolicTensor } from "@tensorflow/tfjs";
 import { getMlFilters, mlSettings } from "./mlConfig";
 import { ActionData, XYZData } from "./model";
-import { DataWindow } from "./store";
+import { DataWindow, ModelOptions } from "./store";
 
 export type TrainingResult =
   | { error: false; model: tf.LayersModel }
   | { error: true };
-
-export interface ModelOptions {
-  epochs: number;
-  batchSize: number;
-  learningRate: number;
-  neuronNumber: number;
-  testNumber: number;
-}
-
-export const defaultModelOptions: ModelOptions = {
-  epochs: 160,
-  batchSize: 16,
-  learningRate: 0.1,
-  neuronNumber: 16,
-  testNumber: 0,
-};
 
 export const trainModel = async (
   data: ActionData[],
@@ -36,7 +20,11 @@ export const trainModel = async (
   modelOptions: ModelOptions,
   onProgress?: (progress: number) => void
 ): Promise<TrainingResult> => {
-  const { features, labels } = prepareFeaturesAndLabels(data, dataWindow);
+  const { features, labels } = prepareFeaturesAndLabels(
+    data,
+    dataWindow,
+    modelOptions
+  );
   const model: tf.LayersModel = createModel(data, modelOptions);
 
   try {
@@ -63,7 +51,8 @@ export const trainModel = async (
 // Exported for testing
 export const prepareFeaturesAndLabels = (
   actions: ActionData[],
-  dataWindow: DataWindow
+  dataWindow: DataWindow,
+  modelOptions: ModelOptions
 ): { features: number[][]; labels: number[][] } => {
   const features: number[][] = [];
   const labels: number[][] = [];
@@ -72,7 +61,9 @@ export const prepareFeaturesAndLabels = (
   actions.forEach((action, index) => {
     action.recordings.forEach((recording) => {
       // Prepare features
-      features.push(Object.values(applyFilters(recording.data, dataWindow)));
+      features.push(
+        Object.values(applyFilters(recording.data, dataWindow, modelOptions))
+      );
 
       // Prepare labels
       const label: number[] = new Array(numActions) as number[];
@@ -90,7 +81,7 @@ const createModel = (
 ): tf.LayersModel => {
   const numberOfClasses: number = actions.length;
   const inputShape = [
-    mlSettings.includedFilters.size * mlSettings.includedAxes.length,
+    modelOptions.featuresActive.size * mlSettings.includedAxes.length,
   ];
 
   const input = tf.input({ shape: inputShape });
@@ -123,13 +114,14 @@ const normalize = (value: number, min: number, max: number) => {
 export const applyFilters = (
   { x, y, z }: XYZData,
   dataWindow: DataWindow,
+  modelOptions: ModelOptions,
   opts: { normalize?: boolean } = {}
 ): Record<string, number> => {
   if (x.length === 0 || y.length === 0 || z.length === 0) {
     throw new Error("Empty x/y/z data");
   }
   const filters = getMlFilters(dataWindow);
-  return Array.from(mlSettings.includedFilters).reduce((acc, filter) => {
+  return Array.from(modelOptions.featuresActive).reduce((acc, filter) => {
     const { strategy, min, max } = filters[filter];
     const applyFilter = (vs: number[]) =>
       opts.normalize
@@ -159,9 +151,10 @@ export type ConfidencesResult =
 // For predicting
 export const predict = (
   { model, data, classificationIds }: PredictInput,
-  dataWindow: DataWindow
+  dataWindow: DataWindow,
+  modelOptions: ModelOptions
 ): ConfidencesResult => {
-  const input = Object.values(applyFilters(data, dataWindow));
+  const input = Object.values(applyFilters(data, dataWindow, modelOptions));
   const prediction = model.predict(tf.tensor([input])) as tf.Tensor;
   try {
     const confidences = prediction.dataSync() as Float32Array;

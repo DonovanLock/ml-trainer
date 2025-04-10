@@ -14,13 +14,8 @@ import goodTestData from "./test-fixtures/comparison-data/test-data-good.json";
 import okTestData from "./test-fixtures/comparison-data/test-data-ok.json";
 import poorTestData from "./test-fixtures/comparison-data/test-data-poor.json";
 import worstTestData from "./test-fixtures/comparison-data/test-data-worst.json";
-import {
-  prepareFeaturesAndLabels,
-  TrainingResult,
-  trainModel,
-  defaultModelOptions,
-} from "./ml";
-import { currentDataWindow } from "./store";
+import { prepareFeaturesAndLabels, TrainingResult, trainModel } from "./ml";
+import { currentDataWindow, defaultModelOptions } from "./store";
 import { ActionData } from "./model";
 
 const fixUpTestData = (data: Partial<ActionData>[]): ActionData[] => {
@@ -41,7 +36,8 @@ beforeAll(async () => {
 const getModelResults = (data: ActionData[]) => {
   const { features, labels } = prepareFeaturesAndLabels(
     data,
-    currentDataWindow
+    currentDataWindow,
+    defaultModelOptions
   );
 
   if (trainingResult.error) {

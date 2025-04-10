@@ -22,7 +22,6 @@ import {
   predict,
   trainModel,
   prepareFeaturesAndLabels,
-  ModelOptions,
 } from "./ml";
 import {
   DataSamplesView,
@@ -51,6 +50,7 @@ import { BufferedData } from "./buffered-data";
 import { getDetectedAction } from "./utils/prediction";
 import { getTour as getTourSpec } from "./tours";
 import { createPromise, PromiseInfo } from "./hooks/use-promise-ref";
+import { Filter } from "./mlConfig";
 
 export const modelUrl = "indexeddb://micro:bit-ai-creator-model";
 
@@ -85,6 +85,24 @@ export const currentDataWindow: DataWindow = {
   deviceSamplesLength: 50, // Number of samples required at 20 ms intervals for 1 second of data.
 };
 
+export interface ModelOptions {
+  epochs: number;
+  batchSize: number;
+  learningRate: number;
+  neuronNumber: number;
+  testNumber: number;
+  featuresActive: Set<Filter>;
+}
+
+export const defaultModelOptions: ModelOptions = {
+  epochs: 160,
+  batchSize: 16,
+  learningRate: 0.1,
+  neuronNumber: 16,
+  testNumber: 0,
+  featuresActive: mlSettings.includedFilters,
+};
+
 interface PredictionResult {
   confidences: Confidences;
   detected: Action | undefined;
@@ -106,7 +124,6 @@ function removeTestData(
       name: actions[i].name,
       recordings: [],
       testsPassed: actions[i].testsPassed,
-      testNumber: actions[i].testNumber,
     };
     while (j < testNumber) {
       j++;
@@ -137,7 +154,6 @@ function removeTrainingData(
       name: actions[i].name,
       recordings: [],
       testsPassed: actions[i].testsPassed,
-      testNumber: actions[i].testNumber,
     };
     while (j < testNumber) {
       actions1[i].recordings = actions1[i].recordings.concat([
@@ -149,10 +165,15 @@ function removeTrainingData(
   return actions1;
 }
 
-const getModelResults = (data: ActionData[], model: tf.LayersModel) => {
+const getModelResults = (
+  data: ActionData[],
+  model: tf.LayersModel,
+  modelOptions: ModelOptions
+) => {
   const { features, labels } = prepareFeaturesAndLabels(
     data,
-    currentDataWindow
+    currentDataWindow,
+    modelOptions
   );
 
   // const tensorFlowResult = model.evaluate(
@@ -236,6 +257,7 @@ export interface State {
   actions: ActionData[];
   dataWindow: DataWindow;
   model: tf.LayersModel | undefined;
+  modelOptions: ModelOptions;
 
   timestamp: number | undefined;
 
@@ -302,8 +324,12 @@ export interface Actions {
   setActionName(id: ActionData["ID"], name: string): void;
   setActionIcon(id: ActionData["ID"], icon: MakeCodeIcon): void;
   setRequiredConfidence(id: ActionData["ID"], value: number): void;
-  setTestNumber(value: number): void;
   setTestsPassed(values: number[]): void;
+  setBatchSize(value: number): void;
+  setEpochs(value: number): void;
+  setLearningRate(value: number): void;
+  setNeuronNumber(value: number): void;
+  setTestNumber(value: number): void;
   deleteActionRecording(id: ActionData["ID"], recordingIdx: number): void;
   changeSlider(): void;
   deleteAllActions(): void;
@@ -319,13 +345,10 @@ export interface Actions {
   recordingStarted(): void;
   recordingStopped(): void;
   newSession(projectName?: string): void;
-  trainModelFlowStart: (
-    modelOptions: ModelOptions,
-    callback?: () => void
-  ) => Promise<void>;
+  trainModelFlowStart: (callback?: () => void) => Promise<void>;
   closeTrainModelDialogs: () => void;
-  trainModel(modelOptions: ModelOptions): Promise<boolean>;
-  testModel(testNumber: number, model: tf.LayersModel): void;
+  trainModel(): Promise<boolean>;
+  testModel(model: tf.LayersModel): void;
   setSettings(update: Partial<Settings>): void;
   setLanguage(languageId: string): void;
 
@@ -412,6 +435,7 @@ const createMlStore = (logging: Logging) => {
           projectEdited: false,
           settings: defaultSettings,
           model: undefined,
+          modelOptions: defaultModelOptions,
           isEditorOpen: false,
           isEditorReady: false,
           editorStartUp: "in-progress",
@@ -681,27 +705,6 @@ const createMlStore = (logging: Logging) => {
             );
           },
 
-          setTestNumber(value: number) {
-            return set(
-              ({ project, projectEdited, actions, model, dataWindow }) => {
-                const newActions = actions;
-                for (let i = 0; i < actions.length; i++) {
-                  newActions[i].testNumber = value;
-                }
-                return {
-                  actions: newActions,
-                  ...updateProject(
-                    project,
-                    projectEdited,
-                    newActions,
-                    model,
-                    dataWindow
-                  ),
-                };
-              }
-            );
-          },
-
           setTestsPassed(values: number[]) {
             return set(
               ({ project, projectEdited, actions, model, dataWindow }) => {
@@ -721,6 +724,46 @@ const createMlStore = (logging: Logging) => {
                 };
               }
             );
+          },
+
+          setBatchSize(value: number) {
+            return set(({ modelOptions }) => {
+              const newModelOptions = modelOptions;
+              newModelOptions.batchSize = value;
+              return { modelOptions: newModelOptions };
+            });
+          },
+
+          setEpochs(value: number) {
+            return set(({ modelOptions }) => {
+              const newModelOptions = modelOptions;
+              newModelOptions.epochs = value;
+              return { modelOptions: newModelOptions };
+            });
+          },
+
+          setLearningRate(value: number) {
+            return set(({ modelOptions }) => {
+              const newModelOptions = modelOptions;
+              newModelOptions.learningRate = value;
+              return { modelOptions: newModelOptions };
+            });
+          },
+
+          setNeuronNumber(value: number) {
+            return set(({ modelOptions }) => {
+              const newModelOptions = modelOptions;
+              newModelOptions.neuronNumber = value;
+              return { modelOptions: newModelOptions };
+            });
+          },
+
+          setTestNumber(value: number) {
+            return set(({ modelOptions }) => {
+              const newModelOptions = modelOptions;
+              newModelOptions.testNumber = value;
+              return { modelOptions: newModelOptions };
+            });
           },
 
           deleteActionRecording(id: ActionData["ID"], recordingIdx: number) {
@@ -870,11 +913,12 @@ const createMlStore = (logging: Logging) => {
             });
           },
 
-          async trainModelFlowStart(modelOptions, callback?: () => void) {
+          async trainModelFlowStart(callback?: () => void) {
             const {
               settings: { showPreTrainHelp },
               actions,
               trainModel,
+              modelOptions,
             } = get();
             if (
               !hasSufficientDataForTraining(actions, modelOptions.testNumber)
@@ -887,21 +931,25 @@ const createMlStore = (logging: Logging) => {
                 trainModelDialogStage: TrainModelDialogStage.Help,
               });
             } else {
-              await trainModel(modelOptions);
+              await trainModel();
               callback?.();
             }
           },
 
-          testModel(testNumber, model) {
-            const { actions } = get();
-            const actions1 = removeTrainingData(actions, testNumber);
+          testModel(model) {
+            const { actions, modelOptions, setTestsPassed } = get();
+            const actions1 = removeTrainingData(
+              actions,
+              modelOptions.testNumber
+            );
             const correctPredictions: number[] = new Array<number>(
               actions.length
             );
             correctPredictions.fill(0, 0, actions.length);
             const { tensorflowPredictionResult, labels } = getModelResults(
               actions1,
-              model
+              model,
+              modelOptions
             );
             const d = labels[0].length;
             for (
@@ -917,11 +965,17 @@ const createMlStore = (logging: Logging) => {
                 correctPredictions[labels[j].indexOf(Math.max(...labels[j]))]++;
               }
             }
-            this.setTestsPassed(correctPredictions);
+            setTestsPassed(correctPredictions);
           },
 
-          async trainModel(modelOptions) {
-            const { actions, dataWindow, testModel } = get();
+          async trainModel() {
+            const {
+              actions,
+              dataWindow,
+              testModel,
+              modelOptions,
+              setTestsPassed,
+            } = get();
             logging.event({
               type: "model-train",
               detail: {
@@ -950,11 +1004,11 @@ const createMlStore = (logging: Logging) => {
             if (!trainingResult.error) {
               model1 = trainingResult.model;
               if (modelOptions.testNumber > 0) {
-                testModel(modelOptions.testNumber, model1);
+                testModel(model1);
               } else {
                 for (let i = 0; i < actions.length; i++) {
-                  actions[i].testsPassed = 0;
-                  actions[i].testNumber = 0;
+                  const t = new Array<number>(actions.length).fill(0);
+                  setTestsPassed(t);
                 }
               }
             }
@@ -1293,7 +1347,13 @@ const createMlStore = (logging: Logging) => {
           },
 
           startPredicting(buffer: BufferedData) {
-            const { actions, model, predictionInterval, dataWindow } = get();
+            const {
+              actions,
+              model,
+              predictionInterval,
+              dataWindow,
+              modelOptions,
+            } = get();
             if (!model || predictionInterval) {
               return;
             }
@@ -1305,7 +1365,7 @@ const createMlStore = (logging: Logging) => {
                 classificationIds: actions.map((a) => a.ID),
               };
               if (input.data.x.length > dataWindow.minSamples) {
-                const result = predict(input, dataWindow);
+                const result = predict(input, dataWindow, modelOptions);
                 if (result.error) {
                   logging.error(result.detail);
                 } else {

@@ -27,7 +27,6 @@ export interface Action {
   icon: MakeCodeIcon;
   requiredConfidence?: number;
   testsPassed?: number;
-  testNumber?: number;
 }
 
 export interface ActionData extends Action {

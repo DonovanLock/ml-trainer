@@ -33,11 +33,17 @@ import { keyboardShortcuts, useShortcut } from "../keyboard-shortcut-hooks";
 import { useHasSufficientDataForTraining, useStore } from "../store";
 import { tourElClassname } from "../tours";
 import { createTestingModelPageUrl } from "../urls";
-import { ModelOptions } from "../ml";
 
 const DataSamplesPage = () => {
   const actions = useStore((s) => s.actions);
+  const modelOptions = useStore((s) => s.modelOptions);
   const addNewAction = useStore((s) => s.addNewAction);
+  const handleModelClear = useStore((s) => s.modelClear);
+  const setBatchSize = useStore((s) => s.setBatchSize);
+  const setEpochs = useStore((s) => s.setEpochs);
+  const setLearningRate = useStore((s) => s.setLearningRate);
+  const setNeuronNumb = useStore((s) => s.setNeuronNumber);
+  const setTestNumber = useStore((s) => s.setTestNumber);
   const model = useStore((s) => s.model);
   const [selectedActionIdx, setSelectedActionIdx] = useState<number>(0);
 
@@ -59,33 +65,24 @@ const DataSamplesPage = () => {
   }, [actions]);
 
   function upDateModelOptions(): void {
-    modelOptions.batchSize = batch;
-    modelOptions.epochs = epochNum === 1 ? epochNum - 1 : epochNum;
-    modelOptions.learningRate = rateNumber;
-    modelOptions.neuronNumber = neuronNumber;
-    modelOptions.testNumber = testNumber;
+    setBatchSize(batch);
+    setEpochs(epochNum === 1 ? epochNum : epochNum - 1);
+    setLearningRate(rateNumber);
+    setNeuronNumb(neuronNumber);
+    setTestNumber(testNumber);
   }
 
-  const modelOptions: ModelOptions = {
-    batchSize: 16,
-    epochs: 160,
-    learningRate: 0.1,
-    neuronNumber: 16,
-    testNumber: 0,
-  };
-  const [batch, setBatchValue] = useState(16);
+  const [batch, setBatchValue] = useState(modelOptions.batchSize);
   const [showBatchTooltip, setShowBatchTooltip] = useState(false);
-  const [epochNum, setEpochValue] = useState(161);
+  const [epochNum, setEpochValue] = useState(modelOptions.epochs + 1);
   const [showEpochTooltip, setShowEpochTooltip] = useState(false);
-  const [testNumber, setTestNum] = useState(0);
+  const [testNumber, setTestNum] = useState(modelOptions.testNumber);
   const [showTestTooltip, setShowTestTooltip] = useState(false);
-  const [neuronNumber, setNeuronNumber] = useState(16);
+  const [neuronNumber, setNeuronNumber] = useState(modelOptions.neuronNumber);
   const [showNeuronTooltip, setShowNeuronTooltip] = useState(false);
-  const [rateNumber, setRateNumber] = useState(0.1);
+  const [rateNumber, setRateNumber] = useState(modelOptions.learningRate);
   const [showRateTooltip, setShowRateTooltip] = useState(false);
   const [advancedOptionsEnabled, setAdvancedOptionsEnabled] = useState(false);
-  const handleModelClear = useStore((s) => s.modelClear);
-  const setTestNumber = useStore((s) => s.setTestNumber);
 
   const tourStart = useStore((s) => s.tourStart);
   const { isConnected } = useConnectionStage();
@@ -176,7 +173,7 @@ const DataSamplesPage = () => {
                         <Text>Batch Size</Text>
                         <Slider
                           id="BatchSlider"
-                          defaultValue={16}
+                          defaultValue={batch}
                           width="175px"
                           min={1}
                           max={100}
@@ -210,7 +207,7 @@ const DataSamplesPage = () => {
                         <Text>Epoch Number</Text>
                         <Slider
                           id="EpochNumber"
-                          defaultValue={161}
+                          defaultValue={epochNum}
                           width="175px"
                           min={1}
                           max={301}
@@ -245,7 +242,7 @@ const DataSamplesPage = () => {
                         <Text>Learning Rate</Text>
                         <Slider
                           id="RateSlider"
-                          defaultValue={0.1}
+                          defaultValue={rateNumber}
                           width="175px"
                           min={0.1}
                           max={1}
@@ -280,7 +277,7 @@ const DataSamplesPage = () => {
                         <Text>Neuron Number</Text>
                         <Slider
                           id="NeuronSlider"
-                          defaultValue={16}
+                          defaultValue={neuronNumber}
                           width="175px"
                           min={1}
                           max={100}
@@ -314,7 +311,7 @@ const DataSamplesPage = () => {
                         <Text>No. Testing Samples</Text>
                         <Slider
                           id="TestData%age"
-                          defaultValue={0}
+                          defaultValue={testNumber}
                           width="175px"
                           min={0}
                           max={maxTestSize}
@@ -353,12 +350,8 @@ const DataSamplesPage = () => {
                     ref={trainButtonRef}
                     className={tourElClassname.trainModelButton}
                     onClick={() => {
-                      setTestNumber(testNumber);
                       upDateModelOptions();
-                      void trainModelFlowStart(
-                        modelOptions,
-                        handleNavigateToModel
-                      );
+                      void trainModelFlowStart(handleNavigateToModel);
                     }}
                     variant={
                       hasSufficientData ? "primary" : "secondary-disabled"

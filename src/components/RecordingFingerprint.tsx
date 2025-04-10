@@ -23,7 +23,10 @@ const RecordingFingerprint = ({
   ...rest
 }: RecordingFingerprintProps) => {
   const dataWindow = useStore((s) => s.dataWindow);
-  const dataFeatures = applyFilters(data, dataWindow, { normalize: true });
+  const modelOptions = useStore((s) => s.modelOptions);
+  const dataFeatures = applyFilters(data, dataWindow, modelOptions, {
+    normalize: true,
+  });
 
   return (
     <Grid

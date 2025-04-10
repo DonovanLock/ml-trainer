@@ -37,14 +37,9 @@
 
 import * as tf from "@tensorflow/tfjs";
 import * as fs from "fs";
-import {
-  prepareFeaturesAndLabels,
-  TrainingResult,
-  trainModel,
-  defaultModelOptions,
-} from "./ml";
+import { prepareFeaturesAndLabels, TrainingResult, trainModel } from "./ml";
 import { ActionData } from "./model";
-import { currentDataWindow } from "./store";
+import { currentDataWindow, defaultModelOptions } from "./store";
 import trainingData from "./test-fixtures/comparison-data/training-data.json";
 import bestTestData from "./test-fixtures/comparison-data/test-data-best.json";
 import goodTestData from "./test-fixtures/comparison-data/test-data-good.json";
@@ -76,7 +71,8 @@ beforeAll(async () => {
 const getModelResults = (data: ActionData[]) => {
   const { features, labels } = prepareFeaturesAndLabels(
     data,
-    currentDataWindow
+    currentDataWindow,
+    defaultModelOptions
   );
 
   if (trainingResult.error) {

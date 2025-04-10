@@ -1,6 +1,7 @@
 import { Card, CardBody, Text, VStack } from "@chakra-ui/react";
 import { Action } from "../model";
 import { tourElClassname } from "../tours";
+import { useStore } from "../store";
 
 interface TestPassPercentCardProps {
   value: Action;
@@ -17,6 +18,7 @@ const TestPassCard = ({
   selected = false,
   disabled,
 }: TestPassPercentCardProps) => {
+  const modelOptions = useStore((s) => s.modelOptions);
   return (
     <Card
       p={2}
@@ -33,7 +35,7 @@ const TestPassCard = ({
       <CardBody p={0} alignContent="centre">
         <VStack>
           <Text fontSize="xl">
-            {value.testsPassed} out of {value.testNumber}
+            {value.testsPassed} out of {modelOptions.testNumber}
           </Text>
         </VStack>
       </CardBody>

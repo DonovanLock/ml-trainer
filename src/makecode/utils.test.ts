@@ -11,7 +11,7 @@
 import { MakeCodeProject } from "@microbit/makecode-embed/react";
 import * as tf from "@tensorflow/tfjs";
 import { assert, vi } from "vitest";
-import { TrainingResult, trainModel, defaultModelOptions } from "../ml";
+import { TrainingResult, trainModel } from "../ml";
 import { DatasetEditorJsonFormat, ActionData } from "../model";
 import oldProject from "../test-fixtures/project-to-update.json";
 import actionData from "../test-fixtures/still-wave-clap-data-samples-legacy.json";
@@ -25,7 +25,7 @@ import {
   hasMakeCodeMlExtension,
   pxt,
 } from "./utils";
-import { currentDataWindow } from "../store";
+import { currentDataWindow, defaultModelOptions } from "../store";
 
 const data: DatasetEditorJsonFormat = {
   data: actionData as ActionData[],

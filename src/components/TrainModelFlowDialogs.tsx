@@ -12,7 +12,6 @@ import TrainingErrorDialog from "./TrainingErrorDialog";
 import TrainingModelProgressDialog from "./TrainingModelProgressDialog";
 import TrainModelIntroDialog from "./TrainModelHelpDialog";
 import TrainModelInsufficientDataDialog from "./TrainModelInsufficientDataDialog";
-import { defaultModelOptions } from "../ml";
 
 interface TrainModelDialogsProps {
   finalFocusRef?: React.RefObject<HTMLButtonElement>;
@@ -29,7 +28,7 @@ const TrainModelDialogs = ({ finalFocusRef }: TrainModelDialogsProps) => {
   const handleHelpNext = useCallback(
     async (isSkipNextTime: boolean) => {
       setSettings({ showPreTrainHelp: !isSkipNextTime });
-      const result = await trainModel(defaultModelOptions);
+      const result = await trainModel();
       if (result) {
         navigate(createTestingModelPageUrl());
       }
