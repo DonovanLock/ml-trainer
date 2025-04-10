@@ -20,6 +20,7 @@ import {
   RiDeleteBin2Line,
   RiDownload2Line,
   RiUpload2Line,
+  RiArrowUpDownLine,
 } from "react-icons/ri";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useLogging } from "../logging/logging-hooks";
@@ -30,6 +31,7 @@ import LoadProjectMenuItem from "./LoadProjectMenuItem";
 import { NameProjectDialog } from "./NameProjectDialog";
 import ViewDataFeaturesMenuItem from "./ViewDataFeaturesMenuItem";
 import { useProjectIsUntitled } from "../hooks/project-hooks";
+import FilterFeaturesDialogBox from "./FilterFeaturesMenuItem";
 
 const DataSamplesMenu = () => {
   const intl = useIntl();
@@ -41,6 +43,9 @@ const DataSamplesMenu = () => {
   );
   const deleteAllActionsDialogOnOpen = useStore(
     (s) => s.deleteAllActionsDialogOnOpen
+  );
+  const filterFeaturesDialogOnOpen = useStore(
+    (s) => s.filterFeaturesDialogOnOpen
   );
   const closeDialog = useStore((s) => s.closeDialog);
   const isNameProjectDialogOpen = useStore((s) => s.isNameProjectDialogOpen);
@@ -106,6 +111,7 @@ const DataSamplesMenu = () => {
         onConfirm={handleDeleteAllActions}
         onCancel={closeDialog}
       />
+      <FilterFeaturesDialogBox />
       <Menu>
         <MenuButton
           as={IconButton}
@@ -136,6 +142,12 @@ const DataSamplesMenu = () => {
             </MenuItem>
             <MenuDivider />
             <ViewDataFeaturesMenuItem />
+            <MenuItem
+              onClick={filterFeaturesDialogOnOpen}
+              icon={<RiArrowUpDownLine />}
+            >
+              <FormattedMessage id="Filter Active Features" />
+            </MenuItem>
           </MenuList>
         </Portal>
       </Menu>

@@ -30,7 +30,11 @@ import LiveGraphPanel from "../components/LiveGraphPanel";
 import TrainModelDialogs from "../components/TrainModelFlowDialogs";
 import { useConnectionStage } from "../connection-stage-hooks";
 import { keyboardShortcuts, useShortcut } from "../keyboard-shortcut-hooks";
-import { useHasSufficientDataForTraining, useStore } from "../store";
+import {
+  useHasSufficientDataForTraining,
+  useStore,
+  useHasFeatureActive,
+} from "../store";
 import { tourElClassname } from "../tours";
 import { createTestingModelPageUrl } from "../urls";
 
@@ -64,13 +68,13 @@ const DataSamplesPage = () => {
     return Math.max(min, 1);
   }, [actions]);
 
-  function upDateModelOptions(): void {
+  const upDateModelOptions = () => {
     setBatchSize(batch);
     setEpochs(epochNum === 1 ? epochNum : epochNum - 1);
     setLearningRate(rateNumber);
     setNeuronNumb(neuronNumber);
     setTestNumber(testNumber);
-  }
+  };
 
   const [batch, setBatchValue] = useState(modelOptions.batchSize);
   const [showBatchTooltip, setShowBatchTooltip] = useState(false);
@@ -94,6 +98,7 @@ const DataSamplesPage = () => {
   }, [isConnected, tourStart]);
 
   const hasSufficientData = useHasSufficientDataForTraining(testNumber);
+  const hasFeatureActive = useHasFeatureActive();
   const isAddNewActionDisabled = actions.some((a) => a.name.length === 0);
 
   const handleNavigateToModel = useCallback(() => {
@@ -314,7 +319,7 @@ const DataSamplesPage = () => {
                           defaultValue={testNumber}
                           width="175px"
                           min={0}
-                          max={maxTestSize}
+                          max={maxTestSize + 2}
                           colorScheme="blue"
                           onMouseEnter={() => setShowTestTooltip(true)}
                           onMouseLeave={() => setShowTestTooltip(false)}
@@ -344,9 +349,10 @@ const DataSamplesPage = () => {
                       setAdvancedOptionsEnabled(!advancedOptionsEnabled)
                     }
                   >
-                    Enable Advanced Model Options{" "}
+                    Enable Advanced Model Options
                   </Checkbox>
                   <Button
+                    isDisabled={!hasSufficientData || !hasFeatureActive}
                     ref={trainButtonRef}
                     className={tourElClassname.trainModelButton}
                     onClick={() => {
@@ -354,7 +360,9 @@ const DataSamplesPage = () => {
                       void trainModelFlowStart(handleNavigateToModel);
                     }}
                     variant={
-                      hasSufficientData ? "primary" : "secondary-disabled"
+                      hasSufficientData && hasFeatureActive
+                        ? "primary"
+                        : "secondary-disabled"
                     }
                   >
                     <FormattedMessage id="train-model" />

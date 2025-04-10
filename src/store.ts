@@ -311,6 +311,7 @@ export interface State {
   isNameProjectDialogOpen: boolean;
   isRecordingDialogOpen: boolean;
   isConnectToRecordDialogOpen: boolean;
+  isFeaturesFilterDialogOpen: boolean;
 }
 
 export interface ConnectOptions {
@@ -330,6 +331,7 @@ export interface Actions {
   setLearningRate(value: number): void;
   setNeuronNumber(value: number): void;
   setTestNumber(value: number): void;
+  toggleFeaturesActive(values: Set<Filter>): void;
   deleteActionRecording(id: ActionData["ID"], recordingIdx: number): void;
   changeSlider(): void;
   deleteAllActions(): void;
@@ -407,6 +409,7 @@ export interface Actions {
   incompatibleEditorDeviceDialogOnOpen(): void;
   recordingDialogOnOpen(): void;
   connectToRecordDialogOnOpen(): void;
+  filterFeaturesDialogOnOpen(): void;
   closeDialog(): void;
   isNonConnectionDialogOpen(): boolean;
 }
@@ -466,6 +469,7 @@ const createMlStore = (logging: Logging) => {
           isConnectToRecordDialogOpen: false,
           isDeleteActionDialogOpen: false,
           isIncompatibleEditorDeviceDialogOpen: false,
+          isFeaturesFilterDialogOpen: false,
 
           setSettings(update: Partial<Settings>) {
             set(
@@ -762,6 +766,18 @@ const createMlStore = (logging: Logging) => {
             return set(({ modelOptions }) => {
               const newModelOptions = modelOptions;
               newModelOptions.testNumber = value;
+              return { modelOptions: newModelOptions };
+            });
+          },
+
+          toggleFeaturesActive(values: Set<Filter>) {
+            return set(({ modelOptions }) => {
+              const newModelOptions = modelOptions;
+              values.forEach((f) =>
+                modelOptions.featuresActive.has(f)
+                  ? newModelOptions.featuresActive.delete(f)
+                  : newModelOptions.featuresActive.add(f)
+              );
               return { modelOptions: newModelOptions };
             });
           },
@@ -1433,6 +1449,9 @@ const createMlStore = (logging: Logging) => {
           incompatibleEditorDeviceDialogOnOpen() {
             set({ isIncompatibleEditorDeviceDialogOpen: true });
           },
+          filterFeaturesDialogOnOpen() {
+            set({ isFeaturesFilterDialogOpen: true });
+          },
           closeDialog() {
             set({
               isLanguageDialogOpen: false,
@@ -1446,6 +1465,7 @@ const createMlStore = (logging: Logging) => {
               isConnectToRecordDialogOpen: false,
               isDeleteActionDialogOpen: false,
               isIncompatibleEditorDeviceDialogOpen: false,
+              isFeaturesFilterDialogOpen: false,
             });
           },
 
@@ -1608,6 +1628,11 @@ export const useHasSufficientDataForTraining = (
 ): boolean => {
   const actions = useStore((s) => s.actions);
   return hasSufficientDataForTraining(actions, testNumber);
+};
+
+export const useHasFeatureActive = (): boolean => {
+  const modelOptions = useStore((s) => s.modelOptions);
+  return modelOptions.featuresActive.size > 0;
 };
 
 export const useHasNoStoredData = (): boolean => {
