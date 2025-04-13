@@ -13,115 +13,137 @@ import {
 } from "@chakra-ui/react";
 import { useStore } from "../store";
 import { Filter } from "../mlConfig";
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
+
+interface CheckboxItemProps {
+  filter: Filter;
+  label: string;
+  isChecked: boolean;
+  onChange: (filter: Filter) => void;
+}
+
+const CheckboxItem = ({
+  filter,
+  label,
+  isChecked,
+  onChange,
+}: CheckboxItemProps) => (
+  <Checkbox onChange={() => onChange(filter)} isChecked={isChecked}>
+    {label}
+  </Checkbox>
+);
 
 const FilterFeaturesDialogBox = () => {
-  const featuresActive = useStore((s) => s.modelOptions).featuresActive;
-  const featuresActiveToggle = new Set<Filter>();
-  const actions = useStore((s) => s.actions);
-  const setActionName = useStore((s) => s.setActionName);
-  const toggleFeaturesActive = useStore((s) => s.toggleFeaturesActive);
-  const handleChange = (v: Filter) => {
-    if (featuresActiveToggle.has(v)) {
-      featuresActiveToggle.delete(v);
-    } else {
-      featuresActiveToggle.add(v);
-    }
-  };
-  const isOpen = useStore((s) => s.isFeaturesFilterDialogOpen);
-  const handleSetFeaturesActive = () => {
-    toggleFeaturesActive(featuresActiveToggle);
-    const temp = actions[0].name;
-    setActionName(actions[0].ID, "");
-    setActionName(actions[0].ID, temp);
-    closeDialog();
-  };
-  const handleCancel = () => {
-    featuresActiveToggle.forEach((f) => featuresActiveToggle.delete(f));
-    closeDialog();
-  };
-  const closeDialog = useStore((s) => s.closeDialog);
-  const leastDestructiveRef = useRef<HTMLButtonElement>(null);
-  const heading = <Text>Select which featuers you want active</Text>;
-  const body = (
-    <VStack align="left">
-      <Checkbox
-        onChange={() => handleChange(Filter.MAX)}
-        defaultChecked={featuresActive.has(Filter.MAX)}
-      >
-        Max
-      </Checkbox>
-      <Checkbox
-        onChange={() => handleChange(Filter.MIN)}
-        defaultChecked={featuresActive.has(Filter.MIN)}
-      >
-        Min
-      </Checkbox>
-      <Checkbox
-        onChange={() => handleChange(Filter.MEAN)}
-        defaultChecked={featuresActive.has(Filter.MEAN)}
-      >
-        Mean
-      </Checkbox>
-      <Checkbox
-        onChange={() => handleChange(Filter.STD)}
-        defaultChecked={featuresActive.has(Filter.STD)}
-      >
-        Standard Deviation
-      </Checkbox>
-      <Checkbox
-        onChange={() => handleChange(Filter.PEAKS)}
-        defaultChecked={featuresActive.has(Filter.PEAKS)}
-      >
-        Peaks
-      </Checkbox>
-      <Checkbox
-        onChange={() => handleChange(Filter.ACC)}
-        defaultChecked={featuresActive.has(Filter.ACC)}
-      >
-        Acceleration
-      </Checkbox>
-      <Checkbox
-        onChange={() => handleChange(Filter.ZCR)}
-        defaultChecked={featuresActive.has(Filter.ZCR)}
-      >
-        Zero Crossing Rate
-      </Checkbox>
-      <Checkbox
-        onChange={() => handleChange(Filter.RMS)}
-        defaultChecked={featuresActive.has(Filter.RMS)}
-      >
-        Root Mean Square
-      </Checkbox>
-    </VStack>
+  const {
+    modelOptions,
+    actions,
+    isFeaturesFilterDialogOpen,
+    toggleFeaturesActive,
+    setActionName,
+    closeDialog,
+  } = useStore((state) => ({
+    modelOptions: state.modelOptions,
+    actions: state.actions,
+    isFeaturesFilterDialogOpen: state.isFeaturesFilterDialogOpen,
+    toggleFeaturesActive: state.toggleFeaturesActive,
+    setActionName: state.setActionName,
+    closeDialog: state.closeDialog,
+  }));
+
+  const featuresActive = modelOptions.featuresActive;
+  const [selectedFeatures, setSelectedFeatures] = useState(
+    new Set(featuresActive)
   );
+  const cancelRef = useRef(null);
+
+  useEffect(() => {
+    if (isFeaturesFilterDialogOpen) {
+      setSelectedFeatures(new Set(featuresActive));
+    }
+  }, [isFeaturesFilterDialogOpen, featuresActive]);
+
+  const handleChange = (filter: Filter) => {
+    setSelectedFeatures((prev) => {
+      const updated = new Set(prev);
+      if (updated.has(filter)) {
+        updated.delete(filter);
+      } else {
+        updated.add(filter);
+      }
+      return updated;
+    });
+  };
+
+  const handleSetFeaturesActive = () => {
+    toggleFeaturesActive(selectedFeatures);
+
+    if (actions.length > 0) {
+      const temp = actions[0].name;
+      setActionName(actions[0].ID, "");
+      setActionName(actions[0].ID, temp);
+    }
+
+    closeDialog();
+  };
+
+  const handleCancel = () => {
+    closeDialog();
+  };
+
+  const filterOptions = [
+    { filter: Filter.MAX, label: "Max" },
+    { filter: Filter.MIN, label: "Min" },
+    { filter: Filter.MEAN, label: "Mean" },
+    { filter: Filter.STD, label: "Standard Deviation" },
+    { filter: Filter.PEAKS, label: "Peaks" },
+    { filter: Filter.ACC, label: "Acceleration" },
+    { filter: Filter.ZCR, label: "Zero Crossing Rate" },
+    { filter: Filter.RMS, label: "Root Mean Square" },
+  ];
+
+  const hasChanges = () => {
+    if (selectedFeatures.size !== featuresActive.size) return true;
+    return ![...selectedFeatures].every((filter) => featuresActive.has(filter));
+  };
 
   return (
     <AlertDialog
-      isOpen={isOpen}
-      leastDestructiveRef={leastDestructiveRef}
+      isOpen={isFeaturesFilterDialogOpen}
+      leastDestructiveRef={cancelRef}
       onClose={handleCancel}
     >
       <AlertDialogOverlay>
         <AlertDialogContent>
           <AlertDialogHeader>
             <Heading as="h2" size="md">
-              {heading}
+              <Text>Select which features you want active</Text>
             </Heading>
           </AlertDialogHeader>
-          <AlertDialogBody>{body}</AlertDialogBody>
+          <AlertDialogBody>
+            <VStack align="start" spacing={2}>
+              {filterOptions.map(({ filter, label }) => (
+                <CheckboxItem
+                  key={filter}
+                  filter={filter}
+                  label={label}
+                  isChecked={selectedFeatures.has(filter)}
+                  onChange={handleChange}
+                />
+              ))}
+            </VStack>
+          </AlertDialogBody>
           <AlertDialogFooter>
-            <Button ref={leastDestructiveRef} onClick={handleCancel}>
-              {"Cancel"}
+            <Button ref={cancelRef} onClick={handleCancel}>
+              Cancel
             </Button>
             <Button
-              isDisabled={featuresActiveToggle === featuresActive}
+              isDisabled={!hasChanges()}
               variant="solid"
               colorScheme="red"
               onClick={handleSetFeaturesActive}
               ml={3}
             >
-              {"Confirm"}
+              Confirm
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

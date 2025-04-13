@@ -1037,6 +1037,12 @@
       "value": "Feedback"
     }
   ],
+  "filter-active-features": [
+    {
+      "type": 0,
+      "value": "Filter Active Features"
+    }
+  ],
   "fingerprint-acc-x-tooltip": [
     {
       "type": 0,

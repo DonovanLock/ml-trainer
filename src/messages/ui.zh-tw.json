@@ -1037,6 +1037,12 @@
       "value": "回饋"
     }
   ],
+  "filter-active-features": [
+    {
+      "type": 0,
+      "value": "過濾活動特徵"
+    }
+  ],
   "fingerprint-acc-x-tooltip": [
     {
       "type": 0,

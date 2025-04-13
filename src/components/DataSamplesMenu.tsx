@@ -146,7 +146,7 @@ const DataSamplesMenu = () => {
               onClick={filterFeaturesDialogOnOpen}
               icon={<RiArrowUpDownLine />}
             >
-              <FormattedMessage id="Filter Active Features" />
+              <FormattedMessage id="filter-active-features" />
             </MenuItem>
           </MenuList>
         </Portal>
