@@ -19,8 +19,11 @@ import { currentDataWindow, defaultModelOptions } from "./store";
 import { ActionData } from "./model";
 
 const fixUpTestData = (data: Partial<ActionData>[]): ActionData[] => {
-  data.forEach((action) => (action.icon = "Heart"));
-  return data as ActionData[];
+  // Create a copy of data instead of modifying the original
+  return data.map(action => ({
+    ...action,
+    icon: "Heart"
+  })) as ActionData[];
 };
 
 let trainingResult: TrainingResult;
@@ -41,19 +44,32 @@ const getModelResults = (data: ActionData[]) => {
   );
 
   if (trainingResult.error) {
-    throw Error("No model returned");
+    throw new Error(`Training model returned error: ${trainingResult.error}`);
   }
 
+  if (!trainingResult.model) {
+    throw new Error("No model returned");
+  }
+
+  // Use feature data to predict and evaluate
+  const tensorFeatures = tf.tensor(features);
+  const tensorLabels = tf.tensor(labels);
+
   const tensorFlowResult = trainingResult.model.evaluate(
-    tf.tensor(features),
-    tf.tensor(labels)
+    tensorFeatures,
+    tensorLabels
   );
   const tensorFlowResultAccuracy = (tensorFlowResult as tf.Scalar[])[1]
     .dataSync()[0]
     .toFixed(4);
   const tensorflowPredictionResult = (
-    trainingResult.model.predict(tf.tensor(features)) as tf.Tensor
+    trainingResult.model.predict(tensorFeatures) as tf.Tensor
   ).dataSync();
+
+  // Clean up tensors to prevent memory leaks
+  tensorFeatures.dispose();
+  tensorLabels.dispose();
+
   return {
     tensorFlowResultAccuracy,
     tensorflowPredictionResult,
@@ -76,27 +92,40 @@ let meanCorrectConfidence: number[] = [0, 0, 0, 0, 0];
 const getMetrics = (dataset: number) => {
   const { tensorFlowResultAccuracy, tensorflowPredictionResult, labels } =
     getModelResults(testData[dataset]);
+    
+  // Update accuracy
   accuracy[dataset] += +tensorFlowResultAccuracy;
-  const d = labels[0].length;
-  let totalConfidence: number = 0;
-  let totalCorrectConfidence: number = 0;
-  let correctGuesses: number = 0;
-  for (let i = 0, j = 0; i < tensorflowPredictionResult.length; i += d, j++) {
-    const result = tensorflowPredictionResult.slice(i, i + d);
-    totalConfidence += result[labels[j].indexOf(Math.max(...labels[j]))];
-    if (
-      result.indexOf(Math.max(...result)) ==
-      labels[j].indexOf(Math.max(...labels[j]))
-    ) {
-      totalCorrectConfidence +=
-        result[labels[j].indexOf(Math.max(...labels[j]))];
+  
+  const dimensionSize = labels[0].length;
+  let totalConfidence = 0;
+  let totalCorrectConfidence = 0;
+  let correctGuesses = 0;
+  
+  // Iterate through results to calculate confidence
+  for (let i = 0, j = 0; i < tensorflowPredictionResult.length; i += dimensionSize, j++) {
+    const predictionSlice = tensorflowPredictionResult.slice(i, i + dimensionSize);
+    const actualLabel = labels[j].indexOf(Math.max(...labels[j]));
+    const predictedLabel = predictionSlice.indexOf(Math.max(...predictionSlice));
+    const confidence = predictionSlice[actualLabel];
+    
+    // Add to total confidence
+    totalConfidence += confidence;
+    
+    // If prediction is correct, add to correct prediction confidence
+    if (predictedLabel === actualLabel) {
+      totalCorrectConfidence += confidence;
       correctGuesses += 1;
     }
   }
-  meanConfidence[dataset] +=
-    totalConfidence / (tensorflowPredictionResult.length / d);
-  if (correctGuesses != 0)
+  
+  // Calculate average confidence
+  const totalSamples = tensorflowPredictionResult.length / dimensionSize;
+  meanConfidence[dataset] += totalConfidence / totalSamples;
+  
+  // Calculate average confidence for correct predictions (avoid division by zero)
+  if (correctGuesses > 0) {
     meanCorrectConfidence[dataset] += totalCorrectConfidence / correctGuesses;
+  }
 };
 
 const runs = 10;

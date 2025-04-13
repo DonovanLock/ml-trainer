@@ -108,60 +108,76 @@ const accuracyScores: number[] = [];
 const meanConfidenceScores: number[] = [];
 const meanCorrectConfidenceScores: number[] = [];
 
+interface ModelMetrics {
+  accuracy: number;
+  meanConfidence: number;
+  meanCorrectConfidence: number;
+}
+
+const calculateMetrics = (
+  tensorFlowResultAccuracy: string,
+  tensorflowPredictionResult: Float32Array | Int32Array | Uint8Array,
+  labels: number[][]
+): ModelMetrics => {
+  const d = labels[0].length;
+  let totalConfidence = 0;
+  let totalCorrectConfidence = 0;
+  let correctGuesses = 0;
+
+  for (let i = 0, j = 0; i < tensorflowPredictionResult.length; i += d, j++) {
+    const result = tensorflowPredictionResult.slice(i, i + d);
+    const correctIndex = labels[j].indexOf(Math.max(...labels[j]));
+    const predictedIndex = result.indexOf(Math.max(...result));
+    
+    // Add the confidence score for the correct class
+    totalConfidence += result[correctIndex];
+
+    // Check if prediction was correct
+    if (predictedIndex === correctIndex) {
+      totalCorrectConfidence += result[correctIndex];
+      correctGuesses += 1;
+    }
+  }
+  
+  const accuracy = +tensorFlowResultAccuracy;
+  const meanConfidence = totalConfidence / (tensorflowPredictionResult.length / d);
+  const meanCorrectConfidence = correctGuesses !== 0 
+    ? totalCorrectConfidence / correctGuesses 
+    : 0;
+
+  return { accuracy, meanConfidence, meanCorrectConfidence };
+};
+
 const compareModel = (message: string, dataset: number) => {
   describe(message, () => {
-    let accuracy: number = 0;
-    let meanConfidence: number = 0;
-    let meanCorrectConfidence: number = 0;
+    let metrics: ModelMetrics;
 
     test("Running model", () => {
       const { tensorFlowResultAccuracy, tensorflowPredictionResult, labels } =
         getModelResults(testData[dataset]);
 
-      const d = labels[0].length;
-      let totalConfidence: number = 0;
-      let totalCorrectConfidence: number = 0;
-      let correctGuesses: number = 0;
-
-      for (
-        let i = 0, j = 0;
-        i < tensorflowPredictionResult.length;
-        i += d, j++
-      ) {
-        const result = tensorflowPredictionResult.slice(i, i + d);
-        totalConfidence += result[labels[j].indexOf(Math.max(...labels[j]))];
-
-        if (
-          result.indexOf(Math.max(...result)) ==
-          labels[j].indexOf(Math.max(...labels[j]))
-        ) {
-          totalCorrectConfidence +=
-            result[labels[j].indexOf(Math.max(...labels[j]))];
-          correctGuesses += 1;
-        }
-      }
-      accuracy = +tensorFlowResultAccuracy;
-      meanConfidence =
-        totalConfidence / (tensorflowPredictionResult.length / d);
-      if (correctGuesses != 0)
-        meanCorrectConfidence = totalCorrectConfidence / correctGuesses;
+      metrics = calculateMetrics(
+        tensorFlowResultAccuracy,
+        tensorflowPredictionResult,
+        labels
+      );
     });
 
     test("Accuracy check", () => {
-      accuracyScores.push(accuracy);
-      expect(accuracy).toBeGreaterThanOrEqual(originalAccuracy[dataset]);
+      accuracyScores.push(metrics.accuracy);
+      expect(metrics.accuracy).toBeGreaterThanOrEqual(originalAccuracy[dataset]);
     });
 
     test("Confidence check", () => {
-      meanConfidenceScores.push(meanConfidence);
-      expect(meanConfidence).toBeGreaterThanOrEqual(
+      meanConfidenceScores.push(metrics.meanConfidence);
+      expect(metrics.meanConfidence).toBeGreaterThanOrEqual(
         originalConfidence[dataset]
       );
     });
 
     test("Correct confidence check", () => {
-      meanCorrectConfidenceScores.push(meanCorrectConfidence);
-      expect(meanCorrectConfidence).toBeGreaterThanOrEqual(
+      meanCorrectConfidenceScores.push(metrics.meanCorrectConfidence);
+      expect(metrics.meanCorrectConfidence).toBeGreaterThanOrEqual(
         originalCorrectConfidence[dataset]
       );
     });
