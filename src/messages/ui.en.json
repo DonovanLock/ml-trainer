@@ -2595,6 +2595,18 @@
       "value": "Terms of use"
     }
   ],
+  "test-accuracy-label": [
+    {
+      "type": 0,
+      "value": "Test accuracy"
+    }
+  ],
+  "test-accuracy-tooltip": [
+    {
+      "type": 0,
+      "value": "Shows the number of samples that passed the test out of the number tested"
+    }
+  ],
   "testing-model-actions-region": [
     {
       "type": 0,

@@ -2587,6 +2587,18 @@
       "value": "網站使用條款"
     }
   ],
+  "test-accuracy-label": [
+    {
+      "type": 0,
+      "value": "測試準確率"
+    }
+  ],
+  "test-accuracy-tooltip": [
+    {
+      "type": 0,
+      "value": "顯示經過測試的樣品數量中通過測試的樣品數量"
+    }
+  ],
   "testing-model-actions-region": [
     {
       "type": 0,

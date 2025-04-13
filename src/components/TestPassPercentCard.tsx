@@ -12,13 +12,14 @@ interface TestPassPercentCardProps {
   disabled?: boolean;
 }
 
-const TestPassCard = ({
+const TestPassPercentCard = ({
   value,
   onSelectRow,
   selected = false,
   disabled,
 }: TestPassPercentCardProps) => {
   const modelOptions = useStore((s) => s.modelOptions);
+
   return (
     <Card
       p={2}
@@ -30,12 +31,12 @@ const TestPassCard = ({
       onClick={onSelectRow}
       position="relative"
       className={tourElClassname.dataSamplesActionCard}
-      opacity={disabled ? 0.5 : undefined}
+      opacity={disabled ? 0.5 : 1}
     >
-      <CardBody p={0} alignContent="centre">
-        <VStack>
-          <Text fontSize="xl">
-            {value.testsPassed} out of {modelOptions.testNumber}
+      <CardBody p={0} display="flex" alignItems="center" justifyContent="center">
+        <VStack spacing={2}>
+          <Text fontSize="xl" fontWeight="medium">
+            {value.testsPassed} / {modelOptions.testNumber}
           </Text>
         </VStack>
       </CardBody>
@@ -43,4 +44,4 @@ const TestPassCard = ({
   );
 };
 
-export default TestPassCard;
+export default TestPassPercentCard;
