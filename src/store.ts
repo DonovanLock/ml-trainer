@@ -935,12 +935,18 @@ const createMlStore = (logging: Logging) => {
               actions,
               trainModel,
               modelOptions,
+              setActionName,
             } = get();
             if (
               !hasSufficientDataForTraining(actions, modelOptions.testNumber)
             ) {
               set({
                 trainModelDialogStage: TrainModelDialogStage.InsufficientData,
+              });
+            } else if (!hasFeatureActive(modelOptions.featuresActive)) {
+              setActionName(actions[0].ID, "Temp");
+              set({
+                trainModelDialogStage: TrainModelDialogStage.NoFeaturesActive,
               });
             } else if (showPreTrainHelp) {
               set({
@@ -1630,9 +1636,12 @@ export const useHasSufficientDataForTraining = (
   return hasSufficientDataForTraining(actions, testNumber);
 };
 
-export const useHasFeatureActive = (): boolean => {
-  const modelOptions = useStore((s) => s.modelOptions);
-  return modelOptions.featuresActive.size > 0;
+export const useHasFeatureActive = (featuresActive: Set<Filter>): boolean => {
+  return hasFeatureActive(featuresActive);
+};
+
+const hasFeatureActive = (featuresActive: Set<Filter>): boolean => {
+  return featuresActive.size > 0;
 };
 
 export const useHasNoStoredData = (): boolean => {

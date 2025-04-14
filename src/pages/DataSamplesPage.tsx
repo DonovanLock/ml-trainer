@@ -98,7 +98,7 @@ const DataSamplesPage = () => {
   }, [isConnected, tourStart]);
 
   const hasSufficientData = useHasSufficientDataForTraining(testNumber);
-  const hasFeatureActive = useHasFeatureActive();
+  const hasFeatureActive = useHasFeatureActive(modelOptions.featuresActive);
   const isAddNewActionDisabled = actions.some((a) => a.name.length === 0);
 
   const handleNavigateToModel = useCallback(() => {
@@ -352,7 +352,6 @@ const DataSamplesPage = () => {
                     Enable Advanced Model Options
                   </Checkbox>
                   <Button
-                    isDisabled={!hasSufficientData || !hasFeatureActive}
                     ref={trainButtonRef}
                     className={tourElClassname.trainModelButton}
                     onClick={() => {

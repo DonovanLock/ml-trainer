@@ -18,8 +18,6 @@ import { useRef } from "react";
 const FilterFeaturesDialogBox = () => {
   const featuresActive = useStore((s) => s.modelOptions).featuresActive;
   const featuresActiveToggle = new Set<Filter>();
-  const actions = useStore((s) => s.actions);
-  const setActionName = useStore((s) => s.setActionName);
   const toggleFeaturesActive = useStore((s) => s.toggleFeaturesActive);
   const handleChange = (v: Filter) => {
     if (featuresActiveToggle.has(v)) {
@@ -31,9 +29,6 @@ const FilterFeaturesDialogBox = () => {
   const isOpen = useStore((s) => s.isFeaturesFilterDialogOpen);
   const handleSetFeaturesActive = () => {
     toggleFeaturesActive(featuresActiveToggle);
-    const temp = actions[0].name;
-    setActionName(actions[0].ID, "");
-    setActionName(actions[0].ID, temp);
     closeDialog();
   };
   const handleCancel = () => {

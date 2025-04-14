@@ -12,6 +12,7 @@ import TrainingErrorDialog from "./TrainingErrorDialog";
 import TrainingModelProgressDialog from "./TrainingModelProgressDialog";
 import TrainModelIntroDialog from "./TrainModelHelpDialog";
 import TrainModelInsufficientDataDialog from "./TrainModelInsufficientDataDialog";
+import TrainModelNoActiveFeaturesDialog from "./TrainModelNoActiveFeatursDialog";
 
 interface TrainModelDialogsProps {
   finalFocusRef?: React.RefObject<HTMLButtonElement>;
@@ -39,6 +40,11 @@ const TrainModelDialogs = ({ finalFocusRef }: TrainModelDialogsProps) => {
     <>
       <TrainModelInsufficientDataDialog
         isOpen={stage === TrainModelDialogStage.InsufficientData}
+        onClose={closeTrainModelDialogs}
+        finalFocusRef={finalFocusRef}
+      />
+      <TrainModelNoActiveFeaturesDialog
+        isOpen={stage === TrainModelDialogStage.NoFeaturesActive}
         onClose={closeTrainModelDialogs}
         finalFocusRef={finalFocusRef}
       />

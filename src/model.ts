@@ -109,6 +109,7 @@ export const enum TrainModelDialogStage {
   Help,
   TrainingError,
   TrainingInProgress,
+  NoFeaturesActive,
 }
 
 export enum DownloadStep {
