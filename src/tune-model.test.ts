@@ -31,7 +31,7 @@ const testData = [
 
 /**
  * Gets the average accuracy of the model on the test data.
- * 
+ *
  * @param options - The ModelOptions to use for training.
  * @returns {Promise<number>} - The average accuracy of the model on the test data.
  */
@@ -71,7 +71,7 @@ const getAverageAccuracy = async (options: ModelOptions) => {
 /**
  * Performs a grid search over the hyperparameters of the model.
  * It tests different combinations of epochs, batch size, learning rate, and neuron number.
- * 
+ *
  * @returns {Promise<void>} - A promise that resolves when the search is complete.
  * The results are saved to a file named "tuningResults.txt".
  */
@@ -108,7 +108,9 @@ const searchGrid = async () => {
   }
 
   // Display results in descending order of accuracy
-  sortedResults = Object.entries(results).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} => Accuracy: ${(v * 100).toFixed(2)}%`);
+  sortedResults = Object.entries(results)
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, v]) => `${k} => Accuracy: ${(v * 100).toFixed(2)}%`);
 
   console.log("Tuning complete. Results saving to tuningResults.txt.");
 };
@@ -118,9 +120,13 @@ beforeAll(async () => {
 });
 
 describe("Hyperparameter tuning", () => {
-  test("Running tuning grid", async () => {
-    await searchGrid();
-  }, maxRunTime);
+  test(
+    "Running tuning grid",
+    async () => {
+      await searchGrid();
+    },
+    maxRunTime
+  );
 });
 
 afterAll(() => {
