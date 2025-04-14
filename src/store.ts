@@ -108,61 +108,53 @@ interface PredictionResult {
   detected: Action | undefined;
 }
 
+/**
+ * Separates data into training and test sets based on testNumber
+ * @param actions Array of action data
+ * @param testNumber Number of samples to use for testing
+ * @param forTraining When true, returns training data, otherwise returns test data
+ * @returns Copy of actions with only the requested data subset
+ */
+function separateActionData(
+  actions: ActionData[],
+  testNumber: number,
+  forTraining: boolean
+): ActionData[] {
+  return actions.map(action => {
+    const result: ActionData = {
+      icon: action.icon,
+      ID: action.ID,
+      name: action.name,
+      recordings: [],
+      testsPassed: action.testsPassed,
+    };
+    
+    if (forTraining) {
+      // For training data, skip the first testNumber recordings
+      if (testNumber < action.recordings.length) {
+        result.recordings = action.recordings.slice(testNumber);
+      }
+    } else {
+      // For test data, take only the first testNumber recordings
+      result.recordings = action.recordings.slice(0, testNumber);
+    }
+    
+    return result;
+  });
+}
+
 function removeTestData(
   actions: ActionData[],
   testNumber: number
 ): ActionData[] {
-  const numActions = actions.length;
-  const actions1: ActionData[] = Array(numActions)
-    .fill(null)
-    .map(() => ({} as ActionData));
-  for (let i = 0; i < numActions; i++) {
-    let j: number = 0;
-    actions1[i] = {
-      icon: actions[i].icon,
-      ID: actions[i].ID,
-      name: actions[i].name,
-      recordings: [],
-      testsPassed: actions[i].testsPassed,
-    };
-    while (j < testNumber) {
-      j++;
-    }
-    while (j < actions[i].recordings.length) {
-      actions1[i].recordings = actions1[i].recordings.concat([
-        actions[i].recordings[j],
-      ]);
-      j++;
-    }
-  }
-  return actions1;
+  return separateActionData(actions, testNumber, true);
 }
 
 function removeTrainingData(
   actions: ActionData[],
   testNumber: number
 ): ActionData[] {
-  const numActions = actions.length;
-  const actions1: ActionData[] = Array(numActions)
-    .fill(null)
-    .map(() => ({} as ActionData));
-  for (let i = 0; i < numActions; i++) {
-    let j: number = 0;
-    actions1[i] = {
-      icon: actions[i].icon,
-      ID: actions[i].ID,
-      name: actions[i].name,
-      recordings: [],
-      testsPassed: actions[i].testsPassed,
-    };
-    while (j < testNumber) {
-      actions1[i].recordings = actions1[i].recordings.concat([
-        actions[i].recordings[j],
-      ]);
-      j++;
-    }
-  }
-  return actions1;
+  return separateActionData(actions, testNumber, false);
 }
 
 const getModelResults = (
@@ -176,18 +168,10 @@ const getModelResults = (
     modelOptions
   );
 
-  // const tensorFlowResult = model.evaluate(
-  //   tf.tensor(features),
-  //   tf.tensor(labels)
-  // );
-  //const tensorFlowResultAccuracy = (tensorFlowResult as tf.Scalar[])[1]
-  //.dataSync()[0]
-  //.toFixed(4);
   const tensorflowPredictionResult = (
     model.predict(tf.tensor(features)) as tf.Tensor
   ).dataSync();
   return {
-    //tensorFlowResultAccuracy,
     tensorflowPredictionResult,
     labels,
   };
@@ -712,10 +696,12 @@ const createMlStore = (logging: Logging) => {
           setTestsPassed(values: number[]) {
             return set(
               ({ project, projectEdited, actions, model, dataWindow }) => {
-                const newActions = actions;
-                for (let i = 0; i < actions.length; i++) {
-                  newActions[i].testsPassed = values[i];
-                }
+                // Create a proper copy of actions to maintain immutability
+                const newActions = actions.map((action, index) => ({
+                  ...action,
+                  testsPassed: values[index] ?? action.testsPassed
+                }));
+                
                 return {
                   actions: newActions,
                   ...updateProject(
@@ -731,54 +717,70 @@ const createMlStore = (logging: Logging) => {
           },
 
           setBatchSize(value: number) {
-            return set(({ modelOptions }) => {
-              const newModelOptions = modelOptions;
-              newModelOptions.batchSize = value;
-              return { modelOptions: newModelOptions };
-            });
+            return set(({ modelOptions }) => ({
+              modelOptions: {
+                ...modelOptions,
+                batchSize: value
+              }
+            }));
           },
 
           setEpochs(value: number) {
-            return set(({ modelOptions }) => {
-              const newModelOptions = modelOptions;
-              newModelOptions.epochs = value;
-              return { modelOptions: newModelOptions };
-            });
+            return set(({ modelOptions }) => ({
+              modelOptions: {
+                ...modelOptions,
+                epochs: value
+              }
+            }));
           },
 
           setLearningRate(value: number) {
-            return set(({ modelOptions }) => {
-              const newModelOptions = modelOptions;
-              newModelOptions.learningRate = value;
-              return { modelOptions: newModelOptions };
-            });
+            return set(({ modelOptions }) => ({
+              modelOptions: {
+                ...modelOptions,
+                learningRate: value
+              }
+            }));
           },
 
           setNeuronNumber(value: number) {
-            return set(({ modelOptions }) => {
-              const newModelOptions = modelOptions;
-              newModelOptions.neuronNumber = value;
-              return { modelOptions: newModelOptions };
-            });
+            return set(({ modelOptions }) => ({
+              modelOptions: {
+                ...modelOptions,
+                neuronNumber: value
+              }
+            }));
           },
 
           setTestNumber(value: number) {
-            return set(({ modelOptions }) => {
-              const newModelOptions = modelOptions;
-              newModelOptions.testNumber = value;
-              return { modelOptions: newModelOptions };
-            });
+            return set(({ modelOptions }) => ({
+              modelOptions: {
+                ...modelOptions,
+                testNumber: value
+              }
+            }));
           },
 
           toggleFeaturesActive(values: Set<Filter>) {
             return set(({ modelOptions }) => {
-              const newModelOptions = modelOptions;
-              values.forEach((f) =>
-                modelOptions.featuresActive.has(f)
-                  ? newModelOptions.featuresActive.delete(f)
-                  : newModelOptions.featuresActive.add(f)
-              );
-              return { modelOptions: newModelOptions };
+              // Create a new Set from the existing one
+              const updatedFeatures = new Set(modelOptions.featuresActive);
+              
+              // Toggle each feature
+              values.forEach(feature => {
+                if (updatedFeatures.has(feature)) {
+                  updatedFeatures.delete(feature);
+                } else {
+                  updatedFeatures.add(feature);
+                }
+              });
+              
+              return {
+                modelOptions: {
+                  ...modelOptions,
+                  featuresActive: updatedFeatures
+                }
+              };
             });
           },
 
@@ -954,33 +956,37 @@ const createMlStore = (logging: Logging) => {
 
           testModel(model) {
             const { actions, modelOptions, setTestsPassed } = get();
-            const actions1 = removeTrainingData(
-              actions,
-              modelOptions.testNumber
-            );
-            const correctPredictions: number[] = new Array<number>(
-              actions.length
-            );
-            correctPredictions.fill(0, 0, actions.length);
+            
+            // Get test data only
+            const testData = removeTrainingData(actions, modelOptions.testNumber);
+            
+            // Initialize array to track correct predictions for each action
+            const correctPredictions = new Array<number>(actions.length).fill(0);
+            
+            // Get predictions and expected results
             const { tensorflowPredictionResult, labels } = getModelResults(
-              actions1,
+              testData,
               model,
               modelOptions
             );
-            const d = labels[0].length;
-            for (
-              let i = 0, j = 0;
-              i < tensorflowPredictionResult.length;
-              i += d, j++
-            ) {
-              const result = tensorflowPredictionResult.slice(i, i + d);
-              if (
-                result.indexOf(Math.max(...result)) ===
-                labels[j].indexOf(Math.max(...labels[j]))
-              ) {
-                correctPredictions[labels[j].indexOf(Math.max(...labels[j]))]++;
+            
+            const numClasses = labels[0].length;
+            
+            // Compare each prediction with its corresponding label
+            for (let sampleIndex = 0; sampleIndex < labels.length; sampleIndex++) {
+              const startIdx = sampleIndex * numClasses;
+              const prediction = tensorflowPredictionResult.slice(startIdx, startIdx + numClasses);
+              const label = labels[sampleIndex];
+              
+              const predictedClassIndex = prediction.indexOf(Math.max(...prediction));
+              const actualClassIndex = label.indexOf(Math.max(...label));
+              
+              // If prediction matches actual class, increment counter for that class
+              if (predictedClassIndex === actualClassIndex) {
+                correctPredictions[actualClassIndex]++;
               }
             }
+            
             setTestsPassed(correctPredictions);
           },
 
@@ -992,6 +998,8 @@ const createMlStore = (logging: Logging) => {
               modelOptions,
               setTestsPassed,
             } = get();
+            
+            // Log the training event
             logging.event({
               type: "model-train",
               detail: {
@@ -999,53 +1007,62 @@ const createMlStore = (logging: Logging) => {
                 samples: getTotalNumSamples(actions),
               },
             });
-            const actionName = "trainModel";
-            const actions1 = removeTestData(actions, modelOptions.testNumber);
+            
+            // Remove test data from training set
+            const trainingData = removeTestData(actions, modelOptions.testNumber);
+            
+            // Update UI state before training
             set({
               trainModelDialogStage: TrainModelDialogStage.TrainingInProgress,
               trainModelProgress: 0,
             });
-            // Delay so we get UI change before training starts. The initial part of training
-            // can block the UI. 50 ms is not sufficient, so use 100 for now.
+            
+            // Ensure UI updates before starting intensive training process
             await new Promise((res) => setTimeout(res, 100));
+            
+            // Train the model
             const trainingResult = await trainModel(
-              actions1,
+              trainingData,
               dataWindow,
               modelOptions,
-              (trainModelProgress) =>
-                set({ trainModelProgress }, false, "trainModelProgress")
+              (progress) => set({ trainModelProgress: progress }, false, "trainModelProgress")
             );
-            //const model = trainingResult.error ? undefined : trainingResult.model
-            let model1: tf.LayersModel | undefined = undefined;
+            
+            // Handle training result
+            let trainedModel: tf.LayersModel | undefined = undefined;
+            
             if (!trainingResult.error) {
-              model1 = trainingResult.model;
+              trainedModel = trainingResult.model;
+              
+              // Handle test results
               if (modelOptions.testNumber > 0) {
-                testModel(model1);
+                testModel(trainedModel);
               } else {
-                for (let i = 0; i < actions.length; i++) {
-                  const t = new Array<number>(actions.length).fill(0);
-                  setTestsPassed(t);
-                }
+                // Reset test results when no test data is used
+                const emptyResults = new Array<number>(actions.length).fill(0);
+                setTestsPassed(emptyResults);
               }
             }
-            const model = model1;
+            
+            // Update state with new model and UI state
             set(
               ({ project, projectEdited }) => ({
-                model,
-                trainModelDialogStage: model
+                model: trainedModel,
+                trainModelDialogStage: trainedModel
                   ? TrainModelDialogStage.Closed
                   : TrainModelDialogStage.TrainingError,
                 ...updateProject(
                   project,
                   projectEdited,
                   actions,
-                  model,
+                  trainedModel,
                   dataWindow
                 ),
               }),
               false,
-              actionName
+              "trainModel"
             );
+            
             return !trainingResult.error;
           },
 
