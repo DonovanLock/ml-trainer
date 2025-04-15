@@ -258,6 +258,7 @@ export interface State {
   dataWindow: DataWindow;
   model: tf.LayersModel | undefined;
   modelOptions: ModelOptions;
+  advancedOptionsEnabled: boolean;
 
   timestamp: number | undefined;
 
@@ -332,6 +333,8 @@ export interface Actions {
   setNeuronNumber(value: number): void;
   setTestNumber(value: number): void;
   toggleFeaturesActive(values: Set<Filter>): void;
+  toggleAdvancedOptionsEnabled(): void;
+  resetModelOptions(): void;
   deleteActionRecording(id: ActionData["ID"], recordingIdx: number): void;
   changeSlider(): void;
   deleteAllActions(): void;
@@ -439,6 +442,7 @@ const createMlStore = (logging: Logging) => {
           settings: defaultSettings,
           model: undefined,
           modelOptions: defaultModelOptions,
+          advancedOptionsEnabled: false,
           isEditorOpen: false,
           isEditorReady: false,
           editorStartUp: "in-progress",
@@ -731,6 +735,8 @@ const createMlStore = (logging: Logging) => {
           },
 
           setBatchSize(value: number) {
+            const { modelClear } = get();
+            modelClear();
             return set(({ modelOptions }) => {
               const newModelOptions = modelOptions;
               newModelOptions.batchSize = value;
@@ -739,6 +745,8 @@ const createMlStore = (logging: Logging) => {
           },
 
           setEpochs(value: number) {
+            const { modelClear } = get();
+            modelClear();
             return set(({ modelOptions }) => {
               const newModelOptions = modelOptions;
               newModelOptions.epochs = value;
@@ -747,6 +755,8 @@ const createMlStore = (logging: Logging) => {
           },
 
           setLearningRate(value: number) {
+            const { modelClear } = get();
+            modelClear();
             return set(({ modelOptions }) => {
               const newModelOptions = modelOptions;
               newModelOptions.learningRate = value;
@@ -755,6 +765,8 @@ const createMlStore = (logging: Logging) => {
           },
 
           setNeuronNumber(value: number) {
+            const { modelClear } = get();
+            modelClear();
             return set(({ modelOptions }) => {
               const newModelOptions = modelOptions;
               newModelOptions.neuronNumber = value;
@@ -763,6 +775,8 @@ const createMlStore = (logging: Logging) => {
           },
 
           setTestNumber(value: number) {
+            const { modelClear } = get();
+            modelClear();
             return set(({ modelOptions }) => {
               const newModelOptions = modelOptions;
               newModelOptions.testNumber = value;
@@ -771,6 +785,8 @@ const createMlStore = (logging: Logging) => {
           },
 
           toggleFeaturesActive(values: Set<Filter>) {
+            const { modelClear } = get();
+            modelClear();
             return set(({ modelOptions }) => {
               const newModelOptions = modelOptions;
               values.forEach((f) =>
@@ -780,6 +796,28 @@ const createMlStore = (logging: Logging) => {
               );
               return { modelOptions: newModelOptions };
             });
+          },
+
+          toggleAdvancedOptionsEnabled() {
+            return set(({ advancedOptionsEnabled }) => {
+              const newAdvancedOptionsEnabled = !advancedOptionsEnabled;
+              return { advancedOptionsEnabled: newAdvancedOptionsEnabled };
+            });
+          },
+
+          resetModelOptions() {
+            const {
+              setBatchSize,
+              setEpochs,
+              setLearningRate,
+              setNeuronNumber,
+              setTestNumber,
+            } = get();
+            setBatchSize(16);
+            setEpochs(160);
+            setLearningRate(0.1);
+            setNeuronNumber(16);
+            setTestNumber(0);
           },
 
           deleteActionRecording(id: ActionData["ID"], recordingIdx: number) {

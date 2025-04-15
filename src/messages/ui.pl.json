@@ -39,6 +39,24 @@
       "value": "micro:bit pokazujący oś X przechodzącą z przodu, oś Y idącą w dół i w górę, oś Z idącą do tyłu i do przodu"
     }
   ],
+  "accuracy-label": [
+    {
+      "type": 0,
+      "value": "Test Accuracy"
+    }
+  ],
+  "accuracy-label-tooltip-aria": [
+    {
+      "type": 0,
+      "value": "Accuracy Tooltip"
+    }
+  ],
+  "accuracy-tooltip": [
+    {
+      "type": 0,
+      "value": "Shows the number of samples that passed the test out of the number tested"
+    }
+  ],
   "action-label": [
     {
       "type": 0,
@@ -1039,6 +1057,12 @@
     {
       "type": 0,
       "value": "Informacje zwrotne"
+    }
+  ],
+  "filter-features-dialog-heading": [
+    {
+      "type": 0,
+      "value": "Filter Active Features"
     }
   ],
   "fingerprint-acc-x-tooltip": [

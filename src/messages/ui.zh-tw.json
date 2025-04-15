@@ -43,6 +43,24 @@
       "value": "micro:bit 會顯示 X 軸穿過前方，Y 軸向下和向上，Z 軸回到前方"
     }
   ],
+  "accuracy-label": [
+    {
+      "type": 0,
+      "value": "Test Accuracy"
+    }
+  ],
+  "accuracy-label-tooltip-aria": [
+    {
+      "type": 0,
+      "value": "Accuracy Tooltip"
+    }
+  ],
+  "accuracy-tooltip": [
+    {
+      "type": 0,
+      "value": "Shows the number of samples that passed the test out of the number tested"
+    }
+  ],
   "action-label": [
     {
       "type": 0,
@@ -1035,6 +1053,12 @@
     {
       "type": 0,
       "value": "回饋"
+    }
+  ],
+  "filter-features-dialog-heading": [
+    {
+      "type": 0,
+      "value": "Filter Active Features"
     }
   ],
   "fingerprint-acc-x-tooltip": [

@@ -39,6 +39,24 @@
       "value": "micro:bit que mostra l'eix X de darrere al davant mesurant el balanceig de dreta a esquerra, l'eix Y de costat a costat mesura el capcineig endavant o enrere, l'eix Z mesura el moviment amunt i avall"
     }
   ],
+  "accuracy-label": [
+    {
+      "type": 0,
+      "value": "Test Accuracy"
+    }
+  ],
+  "accuracy-label-tooltip-aria": [
+    {
+      "type": 0,
+      "value": "Accuracy Tooltip"
+    }
+  ],
+  "accuracy-tooltip": [
+    {
+      "type": 0,
+      "value": "Shows the number of samples that passed the test out of the number tested"
+    }
+  ],
   "action-label": [
     {
       "type": 0,
@@ -1035,6 +1053,12 @@
     {
       "type": 0,
       "value": "Comentaris"
+    }
+  ],
+  "filter-features-dialog-heading": [
+    {
+      "type": 0,
+      "value": "Filter Active Features"
     }
   ],
   "fingerprint-acc-x-tooltip": [

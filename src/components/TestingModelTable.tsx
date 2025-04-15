@@ -41,9 +41,8 @@ const headings = [
     descriptionId: "action-tooltip",
   },
   {
-    titleId: "Test Accuracy",
-    descriptionId:
-      "Shows the number of samples that passed the test out of the number tested",
+    titleId: "accuracy-label",
+    descriptionId: "accuracy-tooltip",
   },
   {
     titleId: "certainty-label",

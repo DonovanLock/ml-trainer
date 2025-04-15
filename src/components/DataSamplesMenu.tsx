@@ -31,7 +31,7 @@ import LoadProjectMenuItem from "./LoadProjectMenuItem";
 import { NameProjectDialog } from "./NameProjectDialog";
 import ViewDataFeaturesMenuItem from "./ViewDataFeaturesMenuItem";
 import { useProjectIsUntitled } from "../hooks/project-hooks";
-import FilterFeaturesDialogBox from "./FilterFeaturesMenuItem";
+import FilterFeaturesDialogBox from "./FilterFeaturesDialogBox";
 
 const DataSamplesMenu = () => {
   const intl = useIntl();
@@ -146,7 +146,7 @@ const DataSamplesMenu = () => {
               onClick={filterFeaturesDialogOnOpen}
               icon={<RiArrowUpDownLine />}
             >
-              <FormattedMessage id="Filter Active Features" />
+              <FormattedMessage id="filter-features-dialog-heading" />
             </MenuItem>
           </MenuList>
         </Portal>

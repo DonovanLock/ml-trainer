@@ -39,6 +39,24 @@
       "value": "micro:bitでは、X軸が前面を横切る方向、Y軸が下から上方向、Z軸が裏面から前面の方向を示しています。"
     }
   ],
+  "accuracy-label": [
+    {
+      "type": 0,
+      "value": "Test Accuracy"
+    }
+  ],
+  "accuracy-label-tooltip-aria": [
+    {
+      "type": 0,
+      "value": "Accuracy Tooltip"
+    }
+  ],
+  "accuracy-tooltip": [
+    {
+      "type": 0,
+      "value": "Shows the number of samples that passed the test out of the number tested"
+    }
+  ],
   "action-label": [
     {
       "type": 0,
@@ -1023,6 +1041,12 @@
     {
       "type": 0,
       "value": "フィードバック"
+    }
+  ],
+  "filter-features-dialog-heading": [
+    {
+      "type": 0,
+      "value": "Filter Active Features"
     }
   ],
   "fingerprint-acc-x-tooltip": [

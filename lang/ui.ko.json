@@ -19,6 +19,18 @@
     "defaultMessage": "micro:bit은 X축을 앞으로 이동, Y축을 위 아래로 이동, Z축을 뒤에서 앞으로 표시합니다.",
     "description": "Alt text for image showing the board-relative directions of the X/Y/Z dimensions of the micro:bit accelerometer"
   },
+  "accuracy-label": {
+    "defaultMessage": "Test Accuracy",
+    "description": "Label for the tests passed"
+  },
+  "accuracy-label-tooltip-aria": {
+    "defaultMessage": "Accuracy Tooltip",
+    "description": "Aria label for accuracy label icon"
+  },
+  "accuracy-tooltip": {
+    "defaultMessage": "Shows the number of samples that passed the test out of the number tested",
+    "description": "Tooltip explaining test accuracy"
+  },
   "action-label": {
     "defaultMessage": "행동",
     "description": "Label for a movement-related action, e.g. clapping"
@@ -598,6 +610,10 @@
   "feedback": {
     "defaultMessage": "피드백 평가",
     "description": "Action to open a feedback dialog"
+  },
+  "filter-features-dialog-heading": {
+    "defaultMessage": "Filter Active Features",
+    "description": "Filter Features dialog box"
   },
   "fingerprint-acc-x-tooltip": {
     "defaultMessage": "x 방향 데이터의 합",

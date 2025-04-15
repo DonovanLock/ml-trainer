@@ -19,6 +19,18 @@
     "defaultMessage": "micro:bit 會顯示 X 軸穿過前方，Y 軸向下和向上，Z 軸回到前方",
     "description": "Alt text for image showing the board-relative directions of the X/Y/Z dimensions of the micro:bit accelerometer"
   },
+  "accuracy-label": {
+    "defaultMessage": "Test Accuracy",
+    "description": "Label for the tests passed"
+  },
+  "accuracy-label-tooltip-aria": {
+    "defaultMessage": "Accuracy Tooltip",
+    "description": "Aria label for accuracy label icon"
+  },
+  "accuracy-tooltip": {
+    "defaultMessage": "Shows the number of samples that passed the test out of the number tested",
+    "description": "Tooltip explaining test accuracy"
+  },
   "action-label": {
     "defaultMessage": "動作",
     "description": "Label for a movement-related action, e.g. clapping"
@@ -598,6 +610,10 @@
   "feedback": {
     "defaultMessage": "回饋",
     "description": "Action to open a feedback dialog"
+  },
+  "filter-features-dialog-heading": {
+    "defaultMessage": "Filter Active Features",
+    "description": "Filter Features dialog box"
   },
   "fingerprint-acc-x-tooltip": {
     "defaultMessage": "x 方向數據的總和",

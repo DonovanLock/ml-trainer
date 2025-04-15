@@ -39,6 +39,24 @@
       "value": "micro:bit mostrando o eixo X indo através da frente, o eixo Y indo para baixo e para cima, o eixo Z voltando à frente"
     }
   ],
+  "accuracy-label": [
+    {
+      "type": 0,
+      "value": "Test Accuracy"
+    }
+  ],
+  "accuracy-label-tooltip-aria": [
+    {
+      "type": 0,
+      "value": "Accuracy Tooltip"
+    }
+  ],
+  "accuracy-tooltip": [
+    {
+      "type": 0,
+      "value": "Shows the number of samples that passed the test out of the number tested"
+    }
+  ],
   "action-label": [
     {
       "type": 0,
@@ -1035,6 +1053,12 @@
     {
       "type": 0,
       "value": "Comentários"
+    }
+  ],
+  "filter-features-dialog-heading": [
+    {
+      "type": 0,
+      "value": "Filter Active Features"
     }
   ],
   "fingerprint-acc-x-tooltip": [

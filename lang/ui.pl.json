@@ -19,6 +19,18 @@
     "defaultMessage": "micro:bit pokazujący oś X przechodzącą z przodu, oś Y idącą w dół i w górę, oś Z idącą do tyłu i do przodu",
     "description": "Alt text for image showing the board-relative directions of the X/Y/Z dimensions of the micro:bit accelerometer"
   },
+  "accuracy-label": {
+    "defaultMessage": "Test Accuracy",
+    "description": "Label for the tests passed"
+  },
+  "accuracy-label-tooltip-aria": {
+    "defaultMessage": "Accuracy Tooltip",
+    "description": "Aria label for accuracy label icon"
+  },
+  "accuracy-tooltip": {
+    "defaultMessage": "Shows the number of samples that passed the test out of the number tested",
+    "description": "Tooltip explaining test accuracy"
+  },
   "action-label": {
     "defaultMessage": "Akcja",
     "description": "Label for a movement-related action, e.g. clapping"
@@ -598,6 +610,10 @@
   "feedback": {
     "defaultMessage": "Informacje zwrotne",
     "description": "Action to open a feedback dialog"
+  },
+  "filter-features-dialog-heading": {
+    "defaultMessage": "Filter Active Features",
+    "description": "Filter Features dialog box"
   },
   "fingerprint-acc-x-tooltip": {
     "defaultMessage": "Suma danych w kierunku x",
