@@ -29,13 +29,35 @@ import CodeViewDefaultBlockCard from "./CodeViewDefaultBlockCard";
 import HeadingGrid from "./HeadingGrid";
 import TestPassCard from "./TestPassPercentCard";
 
-const gridCommonProps: Partial<GridProps> = {
+const gridCommonPropsWithTest: Partial<GridProps> = {
   gridTemplateColumns: "290px 200px 360px 40px auto",
   gap: 3,
   w: "100%",
 };
+const gridCommonPropsWithoutTest: Partial<GridProps> = {
+  gridTemplateColumns: "290px 360px 40px auto",
+  gap: 3,
+  w: "100%",
+};
 
-const headings = [
+const headingsWithoutTest = [
+  {
+    titleId: "action-label",
+    descriptionId: "action-tooltip",
+  },
+  {
+    titleId: "certainty-label",
+    descriptionId: "certainty-tooltip",
+  },
+  // Empty heading for arrow column
+  {},
+  {
+    titleId: "code-label",
+    descriptionId: "code-tooltip",
+  },
+];
+
+const headingsWithTest = [
   {
     titleId: "action-label",
     descriptionId: "action-tooltip",
@@ -58,6 +80,7 @@ const headings = [
 
 const TestingModelTable = () => {
   const actions = useStore((s) => s.actions);
+  const modelOptions = useStore((s) => s.modelOptions);
   const setRequiredConfidence = useStore((s) => s.setRequiredConfidence);
   const { project, projectEdited } = useProject();
   const { isConnected } = useConnectionStage();
@@ -65,6 +88,12 @@ const TestingModelTable = () => {
   const makeCodeLang = getMakeCodeLang(languageId);
   const scrollableAreaRef = useRef<HTMLDivElement>(null);
   const intl = useIntl();
+  const gridCommonProps =
+    modelOptions.testNumber > 0
+      ? gridCommonPropsWithTest
+      : gridCommonPropsWithoutTest;
+  const headings =
+    modelOptions.testNumber > 0 ? headingsWithTest : headingsWithoutTest;
   return (
     <MakeCodeRenderBlocksProvider key={makeCodeLang} lang={makeCodeLang}>
       <HeadingGrid {...gridCommonProps} px={5} headings={headings} />
@@ -109,13 +138,18 @@ const TestingModelTable = () => {
                       disabled={!isConnected}
                     />
                   </GridItem>
-                  <GridItem>
-                    <TestPassCard
-                      value={action}
-                      readOnly={true}
-                      disabled={!isConnected}
-                    />
-                  </GridItem>
+                  {modelOptions.testNumber > 0 ? (
+                    <GridItem>
+                      <TestPassCard
+                        value={action}
+                        readOnly={true}
+                        disabled={!isConnected}
+                      />
+                    </GridItem>
+                  ) : (
+                    <></>
+                  )}
+
                   <GridItem>
                     <ActionCertaintyCard
                       actionName={action.name}
