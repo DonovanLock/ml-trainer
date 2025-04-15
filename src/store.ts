@@ -334,9 +334,9 @@ export interface Actions {
   setTestNumber(value: number): void;
   toggleFeaturesActive(values: Set<Filter>): void;
   toggleAdvancedOptionsEnabled(): void;
+  setFeaturesActive(values: Set<Filter>): void;
   resetModelOptions(): void;
   deleteActionRecording(id: ActionData["ID"], recordingIdx: number): void;
-  changeSlider(): void;
   deleteAllActions(): void;
   downloadDataset(): void;
   modelClear(): void;
@@ -785,8 +785,10 @@ const createMlStore = (logging: Logging) => {
           },
 
           toggleFeaturesActive(values: Set<Filter>) {
-            const { modelClear } = get();
-            modelClear();
+            if (values.size > 0) {
+              const { modelClear } = get();
+              modelClear();
+            }
             return set(({ modelOptions }) => {
               const newModelOptions = modelOptions;
               values.forEach((f) =>
@@ -794,6 +796,14 @@ const createMlStore = (logging: Logging) => {
                   ? newModelOptions.featuresActive.delete(f)
                   : newModelOptions.featuresActive.add(f)
               );
+              return { modelOptions: newModelOptions };
+            });
+          },
+
+          setFeaturesActive(values: Set<Filter>) {
+            return set(({ modelOptions }) => {
+              const newModelOptions = modelOptions;
+              newModelOptions.featuresActive = values;
               return { modelOptions: newModelOptions };
             });
           },
@@ -847,21 +857,6 @@ const createMlStore = (logging: Logging) => {
                   newActions,
                   undefined,
                   newDataWindow
-                ),
-              };
-            });
-          },
-
-          changeSlider() {
-            return set(({ project, projectEdited, actions, dataWindow }) => {
-              return {
-                model: undefined,
-                ...updateProject(
-                  project,
-                  projectEdited,
-                  actions,
-                  undefined,
-                  dataWindow
                 ),
               };
             });

@@ -865,6 +865,12 @@
       "value": "\"."
     }
   ],
+  "disable-advanced-options-action": [
+    {
+      "type": 0,
+      "value": "Disable Advanced Model Options"
+    }
+  ],
   "disconnect-action": [
     {
       "type": 0,
@@ -1015,6 +1021,12 @@
     {
       "type": 0,
       "value": "Editar no MakeCode"
+    }
+  ],
+  "enable-advanced-options-action": [
+    {
+      "type": 0,
+      "value": "Disable Advanced Model Options"
     }
   ],
   "estimated-action-aria": [
@@ -2025,6 +2037,18 @@
     {
       "type": 0,
       "value": "Nenhuma amostra de dados"
+    }
+  ],
+  "no-features-active-error": [
+    {
+      "type": 0,
+      "value": "No Features Active"
+    }
+  ],
+  "no-features-fix-desc": [
+    {
+      "type": 0,
+      "value": "You need to have at least one of the features active to train the model"
     }
   ],
   "not-create-ai-hex-import-dialog-content": [

@@ -495,6 +495,10 @@
     "defaultMessage": "\"{action}\" 행동에 대한 {numSamples}개의 기록 {sample} 삭제",
     "description": "Aria label for data sample delete action"
   },
+  "disable-advanced-options-action": {
+    "defaultMessage": "Disable Advanced Model Options",
+    "description": "Disables the advanced Model Options"
+  },
   "disconnect-action": {
     "defaultMessage": "연결 해제",
     "description": "Disconnect (from bluetooth/radio) action"
@@ -590,6 +594,10 @@
   "edit-in-makecode-action": {
     "defaultMessage": "MakeCode에서 편집하기",
     "description": "Edit in MakeCode button text"
+  },
+  "enable-advanced-options-action": {
+    "defaultMessage": "Disable Advanced Model Options",
+    "description": "Enables the advanced Model Options"
   },
   "estimated-action-aria": {
     "defaultMessage": "추정되는 행동: \"{action}\"",
@@ -1182,6 +1190,14 @@
   "no-data-samples": {
     "defaultMessage": "데이터 샘플 없음",
     "description": "Empty data samples page status text"
+  },
+  "no-features-active-error": {
+    "defaultMessage": "No Features Active",
+    "description": "Details why the model won't train"
+  },
+  "no-features-fix-desc": {
+    "defaultMessage": "You need to have at least one of the features active to train the model",
+    "description": "describes how to fix things so the model can train"
   },
   "not-create-ai-hex-import-dialog-content": {
     "defaultMessage": "이 프로젝트에는 데이터 샘플이 없어 코드만 공개되었습니다. 코드를 사용하기 전에 모델을 훈련해야 합니다.",

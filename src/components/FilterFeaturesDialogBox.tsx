@@ -35,6 +35,35 @@ const FilterFeaturesDialogBox = () => {
     featuresActiveToggle.forEach((f) => featuresActiveToggle.delete(f));
     closeDialog();
   };
+  const handleReset = () => {
+    featuresActiveToggle.forEach((f) => featuresActiveToggle.delete(f));
+    if (!featuresActive.has(Filter.MAX)) {
+      featuresActiveToggle.add(Filter.MAX);
+    }
+    if (!featuresActive.has(Filter.MIN)) {
+      featuresActiveToggle.add(Filter.MIN);
+    }
+    if (!featuresActive.has(Filter.MEAN)) {
+      featuresActiveToggle.add(Filter.MEAN);
+    }
+    if (!featuresActive.has(Filter.ACC)) {
+      featuresActiveToggle.add(Filter.ACC);
+    }
+    if (!featuresActive.has(Filter.RMS)) {
+      featuresActiveToggle.add(Filter.RMS);
+    }
+    if (!featuresActive.has(Filter.ZCR)) {
+      featuresActiveToggle.add(Filter.ZCR);
+    }
+    if (!featuresActive.has(Filter.PEAKS)) {
+      featuresActiveToggle.add(Filter.PEAKS);
+    }
+    if (!featuresActive.has(Filter.STD)) {
+      featuresActiveToggle.add(Filter.STD);
+    }
+    toggleFeaturesActive(featuresActiveToggle);
+    closeDialog();
+  };
   const closeDialog = useStore((s) => s.closeDialog);
   const leastDestructiveRef = useRef<HTMLButtonElement>(null);
   const heading = <Text>Select which featuers you want active</Text>;
@@ -106,8 +135,11 @@ const FilterFeaturesDialogBox = () => {
           </AlertDialogHeader>
           <AlertDialogBody>{body}</AlertDialogBody>
           <AlertDialogFooter>
+            <Button ref={leastDestructiveRef} onClick={handleReset} mr={3}>
+              Reset Features
+            </Button>
             <Button ref={leastDestructiveRef} onClick={handleCancel}>
-              {"Cancel"}
+              Cancel
             </Button>
             <Button
               isDisabled={featuresActiveToggle === featuresActive}
@@ -116,7 +148,7 @@ const FilterFeaturesDialogBox = () => {
               onClick={handleSetFeaturesActive}
               ml={3}
             >
-              {"Confirm"}
+              Confirm
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

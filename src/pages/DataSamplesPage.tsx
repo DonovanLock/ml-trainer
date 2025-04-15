@@ -9,7 +9,6 @@ import {
   Flex,
   HStack,
   VStack,
-  Checkbox,
   Text,
   Slider,
   SliderTrack,
@@ -17,7 +16,7 @@ import {
   SliderThumb,
   Tooltip,
 } from "@chakra-ui/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { RiAddLine, RiArrowRightLine } from "react-icons/ri";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useNavigate } from "react-router";
@@ -37,19 +36,18 @@ import {
 } from "../store";
 import { tourElClassname } from "../tours";
 import { createTestingModelPageUrl } from "../urls";
+import ResetModelOptionsButton from "../components/ResetModelOptionsButton";
 
 const DataSamplesPage = () => {
   const actions = useStore((s) => s.actions);
   const modelOptions = useStore((s) => s.modelOptions);
   const advancedOptionsEnabled = useStore((s) => s.advancedOptionsEnabled);
-  const toggleAdvancedOptionsEnabled = useStore(
-    (s) => s.toggleAdvancedOptionsEnabled
-  );
   const addNewAction = useStore((s) => s.addNewAction);
   const setBatchSize = useStore((s) => s.setBatchSize);
   const setEpochs = useStore((s) => s.setEpochs);
   const setLearningRate = useStore((s) => s.setLearningRate);
   const setNeuronNumb = useStore((s) => s.setNeuronNumber);
+  const setTestNumber = useStore((s) => s.setTestNumber);
   const model = useStore((s) => s.model);
   const [selectedActionIdx, setSelectedActionIdx] = useState<number>(0);
 
@@ -71,6 +69,8 @@ const DataSamplesPage = () => {
   const [showNeuronTooltip, setShowNeuronTooltip] = useState(false);
   const [rateNumber, setRateNumber] = useState(modelOptions.learningRate);
   const [showRateTooltip, setShowRateTooltip] = useState(false);
+  const [testNumber, setTestNum] = useState(modelOptions.testNumber);
+  const [showTestTooltip, setShowTestTooltip] = useState(false);
 
   const tourStart = useStore((s) => s.tourStart);
   const { isConnected } = useConnectionStage();
@@ -86,6 +86,20 @@ const DataSamplesPage = () => {
   );
   const hasFeatureActive = useHasFeatureActive(modelOptions.featuresActive);
   const isAddNewActionDisabled = actions.some((a) => a.name.length === 0);
+
+  const maxTestSize = useMemo(() => {
+    let min = 0;
+    if (actions.length > 0) {
+      min = actions[0].recordings.length - 3;
+      for (let i = 1; i < actions.length; i++) {
+        const temp = actions[i].recordings.length - 3;
+        if (temp >= 0 && temp < min) {
+          min = temp;
+        }
+      }
+    }
+    return Math.max(min, 1);
+  }, [actions]);
 
   const handleNavigateToModel = useCallback(() => {
     navigate(createTestingModelPageUrl());
@@ -142,13 +156,14 @@ const DataSamplesPage = () => {
               </Button>
             </HStack>
             <HStack gap={6}>
+              <ResetModelOptionsButton />
               <VStack>
                 {advancedOptionsEnabled ? (
                   <VStack>
                     <Text>Batch Size</Text>
                     <Slider
                       id="BatchSlider"
-                      defaultValue={batch}
+                      value={modelOptions.batchSize}
                       width="125px"
                       min={1}
                       max={100}
@@ -170,7 +185,7 @@ const DataSamplesPage = () => {
                         color="white"
                         placement="top"
                         isOpen={showBatchTooltip}
-                        label={batch}
+                        label={modelOptions.batchSize}
                       >
                         <SliderThumb />
                       </Tooltip>
@@ -186,7 +201,7 @@ const DataSamplesPage = () => {
                     <Text textStyle="sm">Epoch Number</Text>
                     <Slider
                       id="EpochNumber"
-                      defaultValue={epochNum}
+                      value={modelOptions.epochs}
                       width="125px"
                       min={1}
                       max={301}
@@ -209,7 +224,7 @@ const DataSamplesPage = () => {
                         color="white"
                         placement="top"
                         isOpen={showEpochTooltip}
-                        label={epochNum === 1 ? epochNum : epochNum - 1}
+                        label={modelOptions.epochs}
                       >
                         <SliderThumb />
                       </Tooltip>
@@ -225,7 +240,7 @@ const DataSamplesPage = () => {
                     <Text textStyle="sm">Learning Rate</Text>
                     <Slider
                       id="RateSlider"
-                      defaultValue={rateNumber}
+                      value={modelOptions.learningRate}
                       width="125px"
                       min={0.1}
                       max={1}
@@ -248,7 +263,7 @@ const DataSamplesPage = () => {
                         color="white"
                         placement="top"
                         isOpen={showRateTooltip}
-                        label={rateNumber}
+                        label={modelOptions.learningRate}
                       >
                         <SliderThumb />
                       </Tooltip>
@@ -264,7 +279,7 @@ const DataSamplesPage = () => {
                     <Text textStyle="sm">Neuron Number</Text>
                     <Slider
                       id="NeuronSlider"
-                      defaultValue={neuronNumber}
+                      value={modelOptions.neuronNumber}
                       width="125px"
                       min={1}
                       max={100}
@@ -286,7 +301,7 @@ const DataSamplesPage = () => {
                         color="white"
                         placement="top"
                         isOpen={showNeuronTooltip}
-                        label={neuronNumber}
+                        label={modelOptions.neuronNumber}
                       >
                         <SliderThumb />
                       </Tooltip>
@@ -296,12 +311,44 @@ const DataSamplesPage = () => {
                   <></>
                 )}
               </VStack>
-              <Checkbox
-                defaultChecked={advancedOptionsEnabled}
-                onChange={() => toggleAdvancedOptionsEnabled()}
-              >
-                Enable Advanced Model Options
-              </Checkbox>
+              <VStack>
+                {advancedOptionsEnabled ? (
+                  <VStack>
+                    <Text textStyle="sm">No. Testing Samples</Text>
+                    <Slider
+                      id="TestNumberSlider"
+                      value={modelOptions.testNumber}
+                      width="125px"
+                      min={0}
+                      max={maxTestSize}
+                      size="md"
+                      colorScheme="blue"
+                      onMouseEnter={() => setShowTestTooltip(true)}
+                      onMouseLeave={() => setShowTestTooltip(false)}
+                      onChange={(val) => {
+                        setTestNum(Number(val));
+                        setTestNumber(Number(val));
+                      }}
+                    >
+                      <SliderTrack>
+                        <SliderFilledTrack />
+                      </SliderTrack>
+                      <Tooltip
+                        hasArrow
+                        bg="blue.500"
+                        color="white"
+                        placement="top"
+                        isOpen={showTestTooltip}
+                        label={testNumber}
+                      >
+                        <SliderThumb />
+                      </Tooltip>
+                    </Slider>
+                  </VStack>
+                ) : (
+                  <></>
+                )}
+              </VStack>
               {model ? (
                 <HStack>
                   <Button

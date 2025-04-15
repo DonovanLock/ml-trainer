@@ -495,6 +495,10 @@
     "defaultMessage": "Excluir gravação {sample} de {numSamples} para a ação \"{action}\".",
     "description": "Aria label for data sample delete action"
   },
+  "disable-advanced-options-action": {
+    "defaultMessage": "Disable Advanced Model Options",
+    "description": "Disables the advanced Model Options"
+  },
   "disconnect-action": {
     "defaultMessage": "Desconectar",
     "description": "Disconnect (from bluetooth/radio) action"
@@ -590,6 +594,10 @@
   "edit-in-makecode-action": {
     "defaultMessage": "Editar no MakeCode",
     "description": "Edit in MakeCode button text"
+  },
+  "enable-advanced-options-action": {
+    "defaultMessage": "Disable Advanced Model Options",
+    "description": "Enables the advanced Model Options"
   },
   "estimated-action-aria": {
     "defaultMessage": "Ação estimada: \"{action}\"",
@@ -1182,6 +1190,14 @@
   "no-data-samples": {
     "defaultMessage": "Nenhuma amostra de dados",
     "description": "Empty data samples page status text"
+  },
+  "no-features-active-error": {
+    "defaultMessage": "No Features Active",
+    "description": "Details why the model won't train"
+  },
+  "no-features-fix-desc": {
+    "defaultMessage": "You need to have at least one of the features active to train the model",
+    "description": "describes how to fix things so the model can train"
   },
   "not-create-ai-hex-import-dialog-content": {
     "defaultMessage": "Este projeto não contém amostras de dados, portanto, apenas o código foi aberto. Você precisa treinar um modelo antes de poder usar o código.",

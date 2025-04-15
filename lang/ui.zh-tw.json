@@ -495,6 +495,10 @@
     "defaultMessage": "刪除對於動作「{action}」的 {numSamples} 個記錄 {sample}",
     "description": "Aria label for data sample delete action"
   },
+  "disable-advanced-options-action": {
+    "defaultMessage": "Disable Advanced Model Options",
+    "description": "Disables the advanced Model Options"
+  },
   "disconnect-action": {
     "defaultMessage": "中斷連線",
     "description": "Disconnect (from bluetooth/radio) action"
@@ -590,6 +594,10 @@
   "edit-in-makecode-action": {
     "defaultMessage": "在 MakeCode 內編輯",
     "description": "Edit in MakeCode button text"
+  },
+  "enable-advanced-options-action": {
+    "defaultMessage": "Disable Advanced Model Options",
+    "description": "Enables the advanced Model Options"
   },
   "estimated-action-aria": {
     "defaultMessage": "預測動作：「{action}」",
@@ -1182,6 +1190,14 @@
   "no-data-samples": {
     "defaultMessage": "沒有數據樣本",
     "description": "Empty data samples page status text"
+  },
+  "no-features-active-error": {
+    "defaultMessage": "No Features Active",
+    "description": "Details why the model won't train"
+  },
+  "no-features-fix-desc": {
+    "defaultMessage": "You need to have at least one of the features active to train the model",
+    "description": "describes how to fix things so the model can train"
   },
   "not-create-ai-hex-import-dialog-content": {
     "defaultMessage": "這項專案不包含任何數據樣本，因此僅開啟程式碼。您需要先訓練模型，然後才能使用程式碼。",

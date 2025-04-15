@@ -495,6 +495,10 @@
     "defaultMessage": "Suprimeix l'enregistrament {sample} de {numSamples} per a l'acció \"{action}\"",
     "description": "Aria label for data sample delete action"
   },
+  "disable-advanced-options-action": {
+    "defaultMessage": "Disable Advanced Model Options",
+    "description": "Disables the advanced Model Options"
+  },
   "disconnect-action": {
     "defaultMessage": "Desconnecta",
     "description": "Disconnect (from bluetooth/radio) action"
@@ -590,6 +594,10 @@
   "edit-in-makecode-action": {
     "defaultMessage": "Edita a MakeCode",
     "description": "Edit in MakeCode button text"
+  },
+  "enable-advanced-options-action": {
+    "defaultMessage": "Disable Advanced Model Options",
+    "description": "Enables the advanced Model Options"
   },
   "estimated-action-aria": {
     "defaultMessage": "Acció estimada: \"{action}\"",
@@ -1182,6 +1190,14 @@
   "no-data-samples": {
     "defaultMessage": "No hi ha mostres de dades",
     "description": "Empty data samples page status text"
+  },
+  "no-features-active-error": {
+    "defaultMessage": "No Features Active",
+    "description": "Details why the model won't train"
+  },
+  "no-features-fix-desc": {
+    "defaultMessage": "You need to have at least one of the features active to train the model",
+    "description": "describes how to fix things so the model can train"
   },
   "not-create-ai-hex-import-dialog-content": {
     "defaultMessage": "Aquest projecte no contenia cap mostra de dades, de manera que només s'ha obert el programa. Has d'entrenar un model abans de poder utilitzar el programa.",

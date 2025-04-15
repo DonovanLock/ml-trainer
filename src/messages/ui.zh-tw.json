@@ -865,6 +865,12 @@
       "value": "sample"
     }
   ],
+  "disable-advanced-options-action": [
+    {
+      "type": 0,
+      "value": "Disable Advanced Model Options"
+    }
+  ],
   "disconnect-action": [
     {
       "type": 0,
@@ -1015,6 +1021,12 @@
     {
       "type": 0,
       "value": "在 MakeCode 內編輯"
+    }
+  ],
+  "enable-advanced-options-action": [
+    {
+      "type": 0,
+      "value": "Disable Advanced Model Options"
     }
   ],
   "estimated-action-aria": [
@@ -2041,6 +2053,18 @@
     {
       "type": 0,
       "value": "沒有數據樣本"
+    }
+  ],
+  "no-features-active-error": [
+    {
+      "type": 0,
+      "value": "No Features Active"
+    }
+  ],
+  "no-features-fix-desc": [
+    {
+      "type": 0,
+      "value": "You need to have at least one of the features active to train the model"
     }
   ],
   "not-create-ai-hex-import-dialog-content": [

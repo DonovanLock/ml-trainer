@@ -32,6 +32,7 @@ import { NameProjectDialog } from "./NameProjectDialog";
 import ViewDataFeaturesMenuItem from "./ViewDataFeaturesMenuItem";
 import { useProjectIsUntitled } from "../hooks/project-hooks";
 import FilterFeaturesDialogBox from "./FilterFeaturesDialogBox";
+import EnableAdvancedModelOptionsMenuItem from "./EnableAdvancedModelOptionsMenuItem";
 
 const DataSamplesMenu = () => {
   const intl = useIntl();
@@ -142,6 +143,7 @@ const DataSamplesMenu = () => {
             </MenuItem>
             <MenuDivider />
             <ViewDataFeaturesMenuItem />
+            <EnableAdvancedModelOptionsMenuItem />
             <MenuItem
               onClick={filterFeaturesDialogOnOpen}
               icon={<RiArrowUpDownLine />}

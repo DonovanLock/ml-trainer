@@ -28,12 +28,12 @@ const TrainModelNoActiveFeaturesDialog = ({
       <ModalOverlay>
         <ModalContent>
           <ModalHeader>
-            <FormattedMessage id="No Features are active" />
+            <FormattedMessage id="no-features-active-error" />
           </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Text>
-              <FormattedMessage id="You need to have at least one of the features active to train the model" />
+              <FormattedMessage id="no-features-fix-desc" />
             </Text>
           </ModalBody>
           <ModalFooter justifyContent="flex-end">

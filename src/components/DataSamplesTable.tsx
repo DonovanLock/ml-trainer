@@ -40,7 +40,6 @@ import { ConfirmDialog } from "./ConfirmDialog";
 import { actionNameInputId } from "./ActionNameCard";
 import { recordButtonId } from "./ActionDataSamplesCard";
 import { keyboardShortcuts, useShortcut } from "../keyboard-shortcut-hooks";
-import TestSlider from "./TestSlider";
 
 const gridCommonProps: Partial<GridProps> = {
   gridTemplateColumns: "290px 1fr",
@@ -60,7 +59,6 @@ const headings: GridColumnHeadingItemProps[] = [
     itemsRight: (
       <HStack>
         <ShowGraphsCheckbox />
-        <TestSlider />
         <DataSamplesMenu />
       </HStack>
     ),
