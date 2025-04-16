@@ -15,11 +15,13 @@ import ClickableTooltip from "./ClickableTooltip";
 interface RecordingFingerprintProps extends BoxProps {
   data: XYZData;
   size: "sm" | "md";
+  isTest: boolean;
 }
 
 const RecordingFingerprint = ({
   data,
   size,
+  isTest,
   ...rest
 }: RecordingFingerprintProps) => {
   const dataWindow = useStore((s) => s.dataWindow);
@@ -34,8 +36,8 @@ const RecordingFingerprint = ({
       h="100%"
       position="relative"
       borderRadius="md"
-      borderWidth={1}
-      borderColor="gray.200"
+      borderWidth={isTest ? 2 : 1}
+      borderColor={isTest ? "blue" : "gray.200"}
       overflow="hidden"
       templateColumns={`repeat(${Object.keys(dataFeatures).length}, 1fr)`}
       {...rest}

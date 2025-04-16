@@ -158,6 +158,7 @@ export const SettingsDialog = ({
                     <RecordingGraph
                       responsive
                       data={previewGraphData}
+                      isTest={false}
                       role="img"
                       w="full"
                       aria-label={intl.formatMessage({

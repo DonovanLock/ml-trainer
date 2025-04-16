@@ -329,6 +329,7 @@ const DataSample = ({
   const handleDelete = useCallback(() => {
     onDelete(actionId, recordingIndex);
   }, [actionId, onDelete, recordingIndex]);
+  const modelOptions = useStore((s) => s.modelOptions);
   return (
     <HStack key={recording.ID} position="relative">
       {hasClose && (
@@ -355,6 +356,7 @@ const DataSample = ({
         <RecordingGraph
           data={recording.data}
           role="img"
+          isTest={recordingIndex < modelOptions.testNumber}
           aria-label={intl.formatMessage({
             id: "recording-graph-label",
           })}
@@ -375,6 +377,7 @@ const DataSample = ({
         <RecordingFingerprint
           size={view === DataSamplesView.GraphAndDataFeatures ? "sm" : "md"}
           data={recording.data}
+          isTest={recordingIndex < modelOptions.testNumber}
           role="img"
           aria-label={intl.formatMessage({
             id: "recording-fingerprint-label",
