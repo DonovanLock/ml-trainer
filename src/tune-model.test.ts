@@ -1,3 +1,5 @@
+// This test is called via "npm run test:tune".
+
 import * as tf from "@tensorflow/tfjs";
 import * as fs from "fs";
 import { prepareFeaturesAndLabels, trainModel } from "./ml";

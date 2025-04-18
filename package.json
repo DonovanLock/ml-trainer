@@ -18,6 +18,8 @@
     "test:compare": "vitest src/compare-model.test.ts",
     "test:e2e": "playwright test --headed",
     "test:e2e:headless": "playwright test",
+    "test:get-metrics": "vitest src/get-metrics.test.ts",
+    "test:tune": "vitest src/tune-model.test.ts",
     "theme:watch": "chakra-cli tokens src/deployment/default/theme.ts --watch",
     "theme": "chakra-cli tokens src/deployment/default/theme.ts",
     "i18n:compile": "node bin/tidy-lang.cjs && formatjs compile-folder --ast lang src/messages",
