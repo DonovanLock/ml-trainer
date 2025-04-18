@@ -52,6 +52,7 @@ import {
   originalCorrectConfidence,
 } from "./test-fixtures/comparison-data/original-stats.json";
 import { afterAll, beforeAll } from "vitest";
+import { generateDate } from "./utils/date-time-generator";
 
 const fixUpTestData = (data: Partial<ActionData>[]): ActionData[] => {
   data.forEach((action) => (action.icon = "Heart"));
@@ -177,26 +178,8 @@ compareModel("Testing on the best dataset", 4);
 // Generating and formatting log file contents
 afterAll(() => {
   const lines: string[] = [];
-  const now = new Date();
-  const padZero = (n: number): string => {
-    let x = n.toString();
-    if (x.length < 2) x = "0" + x;
-    return x;
-  };
-  const time =
-    padZero(now.getHours()) +
-    ":" +
-    padZero(now.getMinutes()) +
-    ":" +
-    padZero(now.getSeconds());
-  const date =
-    padZero(now.getDate()) +
-    "/" +
-    padZero(now.getMonth() + 1) +
-    "/" +
-    padZero(now.getFullYear());
-  lines.push("This log file was generated at " + time + ", on " + date + ".\n");
 
+  lines.push("This log file was generated at " + generateDate() + ".\n");
   lines.push("ACCURACY RESULTS:");
   lines.push("Dataset:  Worst     Poor      OK        Good      Best      ");
   lines.push(

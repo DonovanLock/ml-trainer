@@ -1,18 +1,18 @@
-This log file was generated at 17:27:27, on 01/04/2025.
+This log file was generated at 02:31:20, 18/04/2025.
 
 ACCURACY RESULTS:
 Dataset:  Worst     Poor      OK        Good      Best      
-Current:  0.7667    0.9333    0.9667    1         1         
+Current:  0.7       0.9333    0.9       1         1         
 Original: 0.79      0.91666   0.94668   0.9967    1         
 
 CONFIDENCE RESULTS:
 Dataset:  Worst     Poor      OK        Good      Best      
-Current:  0.74664   0.92295   0.92132   0.97891   0.98334   
+Current:  0.66479   0.90192   0.87823   0.96021   0.98959   
 Original: 0.71739   0.88556   0.91899   0.97239   0.98774   
 
 CORRECT CONFIDENCE RESULTS:
 Dataset:  Worst     Poor      OK        Good      Best      
-Current:  0.89321   0.96647   0.94116   0.97891   0.98334   
+Current:  0.89745   0.95363   0.96326   0.96021   0.98959   
 Original: 0.86519   0.94464   0.95239   0.97414   0.98774   
 
 DEFINITIONS:
