@@ -13,26 +13,66 @@ import {
 } from "@chakra-ui/react";
 import { useStore } from "../store";
 import { Filter } from "../mlConfig";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 const FilterFeaturesDialogBox = () => {
   const featuresActive = useStore((s) => s.modelOptions).featuresActive;
   const featuresActiveToggle = new Set<Filter>();
+
+  const [maxChecked, setMaxChecked] = useState(featuresActive.has(Filter.MAX));
+  const [minChecked, setMinChecked] = useState(featuresActive.has(Filter.MIN));
+  const [meanChecked, setMeanChecked] = useState(
+    featuresActive.has(Filter.MEAN)
+  );
+  const [accChecked, setAccChecked] = useState(featuresActive.has(Filter.ACC));
+  const [rmsChecked, setRmsChecked] = useState(featuresActive.has(Filter.RMS));
+  const [zcrChecked, setZcrChecked] = useState(featuresActive.has(Filter.ZCR));
+  const [peaksChecked, setPeaksChecked] = useState(
+    featuresActive.has(Filter.PEAKS)
+  );
+  const [stdChecked, setStdChecked] = useState(featuresActive.has(Filter.STD));
+
   const toggleFeaturesActive = useStore((s) => s.toggleFeaturesActive);
-  const handleChange = (v: Filter) => {
-    if (featuresActiveToggle.has(v)) {
-      featuresActiveToggle.delete(v);
-    } else {
-      featuresActiveToggle.add(v);
-    }
-  };
   const isOpen = useStore((s) => s.isFeaturesFilterDialogOpen);
   const handleSetFeaturesActive = () => {
+    if (featuresActive.has(Filter.MAX) !== maxChecked) {
+      featuresActiveToggle.add(Filter.MAX);
+    }
+    if (featuresActive.has(Filter.MIN) !== minChecked) {
+      featuresActiveToggle.add(Filter.MIN);
+    }
+    if (featuresActive.has(Filter.MEAN) !== meanChecked) {
+      featuresActiveToggle.add(Filter.MEAN);
+    }
+    if (featuresActive.has(Filter.PEAKS) !== peaksChecked) {
+      featuresActiveToggle.add(Filter.PEAKS);
+    }
+    if (featuresActive.has(Filter.ZCR) !== zcrChecked) {
+      featuresActiveToggle.add(Filter.ZCR);
+    }
+    if (featuresActive.has(Filter.ACC) !== accChecked) {
+      featuresActiveToggle.add(Filter.ACC);
+    }
+    if (featuresActive.has(Filter.RMS) !== rmsChecked) {
+      featuresActiveToggle.add(Filter.RMS);
+    }
+    if (featuresActive.has(Filter.STD) !== stdChecked) {
+      featuresActiveToggle.add(Filter.STD);
+    }
     toggleFeaturesActive(featuresActiveToggle);
+    setMaxChecked(maxChecked);
     closeDialog();
   };
   const handleCancel = () => {
     featuresActiveToggle.forEach((f) => featuresActiveToggle.delete(f));
+    setMaxChecked(featuresActive.has(Filter.MAX));
+    setMinChecked(featuresActive.has(Filter.MIN));
+    setMeanChecked(featuresActive.has(Filter.MEAN));
+    setAccChecked(featuresActive.has(Filter.ACC));
+    setRmsChecked(featuresActive.has(Filter.RMS));
+    setZcrChecked(featuresActive.has(Filter.ZCR));
+    setPeaksChecked(featuresActive.has(Filter.PEAKS));
+    setStdChecked(featuresActive.has(Filter.STD));
     closeDialog();
   };
   const handleReset = () => {
@@ -61,8 +101,14 @@ const FilterFeaturesDialogBox = () => {
     if (!featuresActive.has(Filter.STD)) {
       featuresActiveToggle.add(Filter.STD);
     }
-    toggleFeaturesActive(featuresActiveToggle);
-    closeDialog();
+    setAccChecked(true);
+    setMaxChecked(true);
+    setMeanChecked(true);
+    setMinChecked(true);
+    setPeaksChecked(true);
+    setRmsChecked(true);
+    setStdChecked(true);
+    setZcrChecked(true);
   };
   const closeDialog = useStore((s) => s.closeDialog);
   const leastDestructiveRef = useRef<HTMLButtonElement>(null);
@@ -70,50 +116,66 @@ const FilterFeaturesDialogBox = () => {
   const body = (
     <VStack align="left">
       <Checkbox
-        onChange={() => handleChange(Filter.MAX)}
-        defaultChecked={featuresActive.has(Filter.MAX)}
+        onChange={() => {
+          setMaxChecked(!maxChecked);
+        }}
+        isChecked={maxChecked}
       >
         Max
       </Checkbox>
       <Checkbox
-        onChange={() => handleChange(Filter.MIN)}
-        defaultChecked={featuresActive.has(Filter.MIN)}
+        onChange={() => {
+          setMinChecked(!minChecked);
+        }}
+        isChecked={minChecked}
       >
         Min
       </Checkbox>
       <Checkbox
-        onChange={() => handleChange(Filter.MEAN)}
-        defaultChecked={featuresActive.has(Filter.MEAN)}
+        onChange={() => {
+          setMeanChecked(!meanChecked);
+        }}
+        isChecked={meanChecked}
       >
         Mean
       </Checkbox>
       <Checkbox
-        onChange={() => handleChange(Filter.STD)}
-        defaultChecked={featuresActive.has(Filter.STD)}
+        onChange={() => {
+          setStdChecked(!stdChecked);
+        }}
+        isChecked={stdChecked}
       >
         Standard Deviation
       </Checkbox>
       <Checkbox
-        onChange={() => handleChange(Filter.PEAKS)}
-        defaultChecked={featuresActive.has(Filter.PEAKS)}
+        onChange={() => {
+          setPeaksChecked(!peaksChecked);
+        }}
+        isChecked={peaksChecked}
       >
         Peaks
       </Checkbox>
       <Checkbox
-        onChange={() => handleChange(Filter.ACC)}
-        defaultChecked={featuresActive.has(Filter.ACC)}
+        onChange={() => {
+          setAccChecked(!accChecked);
+        }}
+        isChecked={accChecked}
       >
         Acceleration
       </Checkbox>
       <Checkbox
-        onChange={() => handleChange(Filter.ZCR)}
-        defaultChecked={featuresActive.has(Filter.ZCR)}
+        onChange={() => {
+          setZcrChecked(!zcrChecked);
+        }}
+        isChecked={zcrChecked}
       >
         Zero Crossing Rate
       </Checkbox>
       <Checkbox
-        onChange={() => handleChange(Filter.RMS)}
-        defaultChecked={featuresActive.has(Filter.RMS)}
+        onChange={() => {
+          setRmsChecked(!rmsChecked);
+        }}
+        isChecked={rmsChecked}
       >
         Root Mean Square
       </Checkbox>
@@ -142,7 +204,6 @@ const FilterFeaturesDialogBox = () => {
               Cancel
             </Button>
             <Button
-              isDisabled={featuresActiveToggle === featuresActive}
               variant="solid"
               colorScheme="red"
               onClick={handleSetFeaturesActive}

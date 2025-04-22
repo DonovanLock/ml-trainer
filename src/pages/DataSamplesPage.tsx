@@ -62,13 +62,6 @@ const DataSamplesPage = () => {
   const navigate = useNavigate();
   const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
 
-  // const upDateModelOptions = () => {
-  //   setBatchSize(batch);
-  //   setEpochs(epochNum === 1 ? epochNum : epochNum - 1);
-  //   setLearningRate(rateNumber);
-  //   setNeuronNumb(neuronNumber);
-  // };
-
   const [batch, setBatchValue] = useState(modelOptions.batchSize);
   const [epochNum, setEpochValue] = useState(modelOptions.epochs + 1);
   const [neuronNumber, setNeuronNumber] = useState(modelOptions.neuronNumber);
@@ -227,7 +220,9 @@ const DataSamplesPage = () => {
                       onMouseEnter={() => setShowEpochTooltip(true)}
                       onMouseLeave={() => setShowEpochTooltip(false)}
                       onChange={(val) => {
-                        setEpochValue(Number(val));
+                        setEpochValue(
+                          Number(val) === 1 ? Number(val) : Number(val) - 1
+                        );
                         setEpochs(Number(val));
                       }}
                     >
@@ -240,7 +235,7 @@ const DataSamplesPage = () => {
                         color="white"
                         placement="top"
                         isOpen={showEpochTooltip}
-                        label={epochNum}
+                        label={epochNum === 1 ? epochNum : epochNum - 1}
                       >
                         <SliderThumb />
                       </Tooltip>
