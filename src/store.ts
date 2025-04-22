@@ -809,8 +809,12 @@ const createMlStore = (logging: Logging) => {
           },
 
           toggleAdvancedOptionsEnabled() {
+            const { resetModelOptions } = get();
             return set(({ advancedOptionsEnabled }) => {
               const newAdvancedOptionsEnabled = !advancedOptionsEnabled;
+              if (!advancedOptionsEnabled) {
+                resetModelOptions();
+              }
               return { advancedOptionsEnabled: newAdvancedOptionsEnabled };
             });
           },

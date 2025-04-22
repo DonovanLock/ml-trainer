@@ -36,7 +36,6 @@ import {
 } from "../store";
 import { tourElClassname } from "../tours";
 import { createTestingModelPageUrl } from "../urls";
-import ResetModelOptionsButton from "../components/ResetModelOptionsButton";
 
 const DataSamplesPage = () => {
   const actions = useStore((s) => s.actions);
@@ -50,26 +49,35 @@ const DataSamplesPage = () => {
   const setTestNumber = useStore((s) => s.setTestNumber);
   const model = useStore((s) => s.model);
   const [selectedActionIdx, setSelectedActionIdx] = useState<number>(0);
+  const resetModelOptions = useStore((s) => s.resetModelOptions);
+  const handleReset = () => {
+    resetModelOptions();
+    setBatchValue(16);
+    setEpochValue(160);
+    setNeuronNumber(16);
+    setRateNumber(0.1);
+    setTestNum(0);
+  };
 
   const navigate = useNavigate();
   const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
 
-  const upDateModelOptions = () => {
-    setBatchSize(batch);
-    setEpochs(epochNum === 1 ? epochNum : epochNum - 1);
-    setLearningRate(rateNumber);
-    setNeuronNumb(neuronNumber);
-  };
+  // const upDateModelOptions = () => {
+  //   setBatchSize(batch);
+  //   setEpochs(epochNum === 1 ? epochNum : epochNum - 1);
+  //   setLearningRate(rateNumber);
+  //   setNeuronNumb(neuronNumber);
+  // };
 
   const [batch, setBatchValue] = useState(modelOptions.batchSize);
-  const [showBatchTooltip, setShowBatchTooltip] = useState(false);
   const [epochNum, setEpochValue] = useState(modelOptions.epochs + 1);
-  const [showEpochTooltip, setShowEpochTooltip] = useState(false);
   const [neuronNumber, setNeuronNumber] = useState(modelOptions.neuronNumber);
-  const [showNeuronTooltip, setShowNeuronTooltip] = useState(false);
   const [rateNumber, setRateNumber] = useState(modelOptions.learningRate);
-  const [showRateTooltip, setShowRateTooltip] = useState(false);
   const [testNumber, setTestNum] = useState(modelOptions.testNumber);
+  const [showBatchTooltip, setShowBatchTooltip] = useState(false);
+  const [showEpochTooltip, setShowEpochTooltip] = useState(false);
+  const [showNeuronTooltip, setShowNeuronTooltip] = useState(false);
+  const [showRateTooltip, setShowRateTooltip] = useState(false);
   const [showTestTooltip, setShowTestTooltip] = useState(false);
 
   const tourStart = useStore((s) => s.tourStart);
@@ -156,7 +164,15 @@ const DataSamplesPage = () => {
               </Button>
             </HStack>
             <HStack gap={6}>
-              <ResetModelOptionsButton />
+              <VStack>
+                {advancedOptionsEnabled ? (
+                  <Button onClick={handleReset} variant="secondary">
+                    Reset Sliders
+                  </Button>
+                ) : (
+                  <></>
+                )}
+              </VStack>
               <VStack>
                 {advancedOptionsEnabled ? (
                   <VStack>
@@ -185,7 +201,7 @@ const DataSamplesPage = () => {
                         color="white"
                         placement="top"
                         isOpen={showBatchTooltip}
-                        label={modelOptions.batchSize}
+                        label={batch}
                       >
                         <SliderThumb />
                       </Tooltip>
@@ -224,7 +240,7 @@ const DataSamplesPage = () => {
                         color="white"
                         placement="top"
                         isOpen={showEpochTooltip}
-                        label={modelOptions.epochs}
+                        label={epochNum}
                       >
                         <SliderThumb />
                       </Tooltip>
@@ -263,7 +279,7 @@ const DataSamplesPage = () => {
                         color="white"
                         placement="top"
                         isOpen={showRateTooltip}
-                        label={modelOptions.learningRate}
+                        label={rateNumber}
                       >
                         <SliderThumb />
                       </Tooltip>
@@ -301,7 +317,7 @@ const DataSamplesPage = () => {
                         color="white"
                         placement="top"
                         isOpen={showNeuronTooltip}
-                        label={modelOptions.neuronNumber}
+                        label={neuronNumber}
                       >
                         <SliderThumb />
                       </Tooltip>
@@ -367,7 +383,6 @@ const DataSamplesPage = () => {
                     ref={trainButtonRef}
                     className={tourElClassname.trainModelButton}
                     onClick={() => {
-                      upDateModelOptions();
                       void trainModelFlowStart(handleNavigateToModel);
                     }}
                     width="175px"
