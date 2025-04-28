@@ -13,180 +13,107 @@ import {
 } from "@chakra-ui/react";
 import { useStore } from "../store";
 import { Filter } from "../mlConfig";
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
+
+interface FilterCheckbox {
+  active: boolean;
+  name: string;
+  filter: Filter;
+}
 
 const FilterFeaturesDialogBox = () => {
   const featuresActive = useStore((s) => s.modelOptions).featuresActive;
-  const featuresActiveToggle = new Set<Filter>();
-
-  const [maxChecked, setMaxChecked] = useState(featuresActive.has(Filter.MAX));
-  const [minChecked, setMinChecked] = useState(featuresActive.has(Filter.MIN));
-  const [meanChecked, setMeanChecked] = useState(
-    featuresActive.has(Filter.MEAN)
-  );
-  const [accChecked, setAccChecked] = useState(featuresActive.has(Filter.ACC));
-  const [rmsChecked, setRmsChecked] = useState(featuresActive.has(Filter.RMS));
-  const [zcrChecked, setZcrChecked] = useState(featuresActive.has(Filter.ZCR));
-  const [peaksChecked, setPeaksChecked] = useState(
-    featuresActive.has(Filter.PEAKS)
-  );
-  const [stdChecked, setStdChecked] = useState(featuresActive.has(Filter.STD));
-
-  const toggleFeaturesActive = useStore((s) => s.toggleFeaturesActive);
+  const setFeaturesActive = useStore((s) => s.setFeaturesActive);
   const isOpen = useStore((s) => s.isFeaturesFilterDialogOpen);
-  const handleSetFeaturesActive = () => {
-    if (featuresActive.has(Filter.MAX) !== maxChecked) {
-      featuresActiveToggle.add(Filter.MAX);
-    }
-    if (featuresActive.has(Filter.MIN) !== minChecked) {
-      featuresActiveToggle.add(Filter.MIN);
-    }
-    if (featuresActive.has(Filter.MEAN) !== meanChecked) {
-      featuresActiveToggle.add(Filter.MEAN);
-    }
-    if (featuresActive.has(Filter.PEAKS) !== peaksChecked) {
-      featuresActiveToggle.add(Filter.PEAKS);
-    }
-    if (featuresActive.has(Filter.ZCR) !== zcrChecked) {
-      featuresActiveToggle.add(Filter.ZCR);
-    }
-    if (featuresActive.has(Filter.ACC) !== accChecked) {
-      featuresActiveToggle.add(Filter.ACC);
-    }
-    if (featuresActive.has(Filter.RMS) !== rmsChecked) {
-      featuresActiveToggle.add(Filter.RMS);
-    }
-    if (featuresActive.has(Filter.STD) !== stdChecked) {
-      featuresActiveToggle.add(Filter.STD);
-    }
-    toggleFeaturesActive(featuresActiveToggle);
-    setMaxChecked(maxChecked);
-    closeDialog();
-  };
-  const handleCancel = () => {
-    featuresActiveToggle.forEach((f) => featuresActiveToggle.delete(f));
-    setMaxChecked(featuresActive.has(Filter.MAX));
-    setMinChecked(featuresActive.has(Filter.MIN));
-    setMeanChecked(featuresActive.has(Filter.MEAN));
-    setAccChecked(featuresActive.has(Filter.ACC));
-    setRmsChecked(featuresActive.has(Filter.RMS));
-    setZcrChecked(featuresActive.has(Filter.ZCR));
-    setPeaksChecked(featuresActive.has(Filter.PEAKS));
-    setStdChecked(featuresActive.has(Filter.STD));
-    closeDialog();
-  };
-  const handleReset = () => {
-    featuresActiveToggle.forEach((f) => featuresActiveToggle.delete(f));
-    if (!featuresActive.has(Filter.MAX)) {
-      featuresActiveToggle.add(Filter.MAX);
-    }
-    if (!featuresActive.has(Filter.MIN)) {
-      featuresActiveToggle.add(Filter.MIN);
-    }
-    if (!featuresActive.has(Filter.MEAN)) {
-      featuresActiveToggle.add(Filter.MEAN);
-    }
-    if (!featuresActive.has(Filter.ACC)) {
-      featuresActiveToggle.add(Filter.ACC);
-    }
-    if (!featuresActive.has(Filter.RMS)) {
-      featuresActiveToggle.add(Filter.RMS);
-    }
-    if (!featuresActive.has(Filter.ZCR)) {
-      featuresActiveToggle.add(Filter.ZCR);
-    }
-    if (!featuresActive.has(Filter.PEAKS)) {
-      featuresActiveToggle.add(Filter.PEAKS);
-    }
-    if (!featuresActive.has(Filter.STD)) {
-      featuresActiveToggle.add(Filter.STD);
-    }
-    setAccChecked(true);
-    setMaxChecked(true);
-    setMeanChecked(true);
-    setMinChecked(true);
-    setPeaksChecked(true);
-    setRmsChecked(true);
-    setStdChecked(true);
-    setZcrChecked(true);
-  };
   const closeDialog = useStore((s) => s.closeDialog);
+
+  const getState = useCallback((featuresActive: Set<Filter>) => {
+    return {
+      max: {
+        active: featuresActive.has(Filter.MAX),
+        name: "Max",
+        filter: Filter.MAX,
+      },
+      min: {
+        active: featuresActive.has(Filter.MIN),
+        name: "Min",
+        filter: Filter.MIN,
+      },
+      mean: {
+        active: featuresActive.has(Filter.MEAN),
+        name: "Mean",
+        filter: Filter.MEAN,
+      },
+      std: {
+        active: featuresActive.has(Filter.STD),
+        name: "Standard Deviation",
+        filter: Filter.STD,
+      },
+      peaks: {
+        active: featuresActive.has(Filter.PEAKS),
+        name: "Peaks",
+        filter: Filter.PEAKS,
+      },
+      acc: {
+        active: featuresActive.has(Filter.ACC),
+        name: "Acceleration",
+        filter: Filter.ACC,
+      },
+      zcr: {
+        active: featuresActive.has(Filter.ZCR),
+        name: "Zero Crossing Rate",
+        filter: Filter.ZCR,
+      },
+      rms: {
+        active: featuresActive.has(Filter.RMS),
+        name: "Root Mean Square",
+        filter: Filter.RMS,
+      },
+    };
+  }, []);
+
+  const [featuresState, setFeaturesState] = useState<
+    Record<string, FilterCheckbox>
+  >(getState(featuresActive));
+
+  const resetFeatures = useCallback(() => {
+    const newActiveFilters = new Set<Filter>([
+      Filter.MAX,
+      Filter.MIN,
+      Filter.MEAN,
+      Filter.STD,
+      Filter.PEAKS,
+      Filter.ACC,
+      Filter.ZCR,
+      Filter.RMS,
+    ]);
+    setFeaturesActive(newActiveFilters);
+    setFeaturesState(getState(newActiveFilters));
+  }, [getState, setFeaturesActive]);
+
+  const handleCancel = useCallback(() => {
+    setFeaturesState(getState(featuresActive));
+    closeDialog();
+  }, [closeDialog, featuresActive, getState]);
+
+  const handleConfirm = useCallback(() => {
+    const newActiveFilters: Filter[] = [];
+    for (const value of Object.values(featuresState)) {
+      if (value.active) {
+        newActiveFilters.push(value.filter);
+      }
+    }
+    setFeaturesActive(new Set(newActiveFilters));
+    closeDialog();
+  }, [closeDialog, featuresState, setFeaturesActive]);
   const leastDestructiveRef = useRef<HTMLButtonElement>(null);
   const heading = <Text>Select which featuers you want active</Text>;
-  const body = (
-    <VStack align="left">
-      <Checkbox
-        onChange={() => {
-          setMaxChecked(!maxChecked);
-        }}
-        isChecked={maxChecked}
-      >
-        Max
-      </Checkbox>
-      <Checkbox
-        onChange={() => {
-          setMinChecked(!minChecked);
-        }}
-        isChecked={minChecked}
-      >
-        Min
-      </Checkbox>
-      <Checkbox
-        onChange={() => {
-          setMeanChecked(!meanChecked);
-        }}
-        isChecked={meanChecked}
-      >
-        Mean
-      </Checkbox>
-      <Checkbox
-        onChange={() => {
-          setStdChecked(!stdChecked);
-        }}
-        isChecked={stdChecked}
-      >
-        Standard Deviation
-      </Checkbox>
-      <Checkbox
-        onChange={() => {
-          setPeaksChecked(!peaksChecked);
-        }}
-        isChecked={peaksChecked}
-      >
-        Peaks
-      </Checkbox>
-      <Checkbox
-        onChange={() => {
-          setAccChecked(!accChecked);
-        }}
-        isChecked={accChecked}
-      >
-        Acceleration
-      </Checkbox>
-      <Checkbox
-        onChange={() => {
-          setZcrChecked(!zcrChecked);
-        }}
-        isChecked={zcrChecked}
-      >
-        Zero Crossing Rate
-      </Checkbox>
-      <Checkbox
-        onChange={() => {
-          setRmsChecked(!rmsChecked);
-        }}
-        isChecked={rmsChecked}
-      >
-        Root Mean Square
-      </Checkbox>
-    </VStack>
-  );
 
   return (
     <AlertDialog
       isOpen={isOpen}
       leastDestructiveRef={leastDestructiveRef}
-      onClose={handleCancel}
+      onClose={closeDialog}
     >
       <AlertDialogOverlay>
         <AlertDialogContent>
@@ -195,9 +122,29 @@ const FilterFeaturesDialogBox = () => {
               {heading}
             </Heading>
           </AlertDialogHeader>
-          <AlertDialogBody>{body}</AlertDialogBody>
+          <AlertDialogBody>
+            <VStack align="left">
+              {Object.entries(featuresState).map(([key, value]) => (
+                <Checkbox
+                  key={key}
+                  onChange={(e) => {
+                    setFeaturesState({
+                      ...featuresState,
+                      [key]: {
+                        ...value,
+                        active: e.target.checked,
+                      },
+                    });
+                  }}
+                  isChecked={value.active}
+                >
+                  {value.name}
+                </Checkbox>
+              ))}
+            </VStack>
+          </AlertDialogBody>
           <AlertDialogFooter>
-            <Button ref={leastDestructiveRef} onClick={handleReset} mr={3}>
+            <Button onClick={resetFeatures} mr={3}>
               Reset Features
             </Button>
             <Button ref={leastDestructiveRef} onClick={handleCancel}>
@@ -206,7 +153,7 @@ const FilterFeaturesDialogBox = () => {
             <Button
               variant="solid"
               colorScheme="red"
-              onClick={handleSetFeaturesActive}
+              onClick={handleConfirm}
               ml={3}
             >
               Confirm

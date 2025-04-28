@@ -29,11 +29,7 @@ import LiveGraphPanel from "../components/LiveGraphPanel";
 import TrainModelDialogs from "../components/TrainModelFlowDialogs";
 import { useConnectionStage } from "../connection-stage-hooks";
 import { keyboardShortcuts, useShortcut } from "../keyboard-shortcut-hooks";
-import {
-  useHasSufficientDataForTraining,
-  useStore,
-  useHasFeatureActive,
-} from "../store";
+import { useHasSufficientDataForTraining, useStore } from "../store";
 import { tourElClassname } from "../tours";
 import { createTestingModelPageUrl } from "../urls";
 
@@ -46,17 +42,27 @@ const DataSamplesPage = () => {
   const setEpochs = useStore((s) => s.setEpochs);
   const setLearningRate = useStore((s) => s.setLearningRate);
   const setNeuronNumb = useStore((s) => s.setNeuronNumber);
-  const setTestNumber = useStore((s) => s.setTestNumber);
+  const setTestNum = useStore((s) => s.setTestNumber);
   const model = useStore((s) => s.model);
   const [selectedActionIdx, setSelectedActionIdx] = useState<number>(0);
   const resetModelOptions = useStore((s) => s.resetModelOptions);
   const handleReset = () => {
     resetModelOptions();
-    setBatchValue(16);
-    setEpochValue(160);
-    setNeuronNumber(16);
-    setRateNumber(0.1);
-    setTestNum(0);
+    if (batch !== 16) {
+      setBatchValue(16);
+    }
+    if (testNumber !== 0) {
+      setTestNumber(0);
+    }
+    if (epochNum !== 160) {
+      setEpochValue(160);
+    }
+    if (neuronNumber !== 16) {
+      setNeuronNumber(16);
+    }
+    if (rateNumber !== 0.1) {
+      setRateNumber(0.1);
+    }
   };
 
   const navigate = useNavigate();
@@ -66,7 +72,7 @@ const DataSamplesPage = () => {
   const [epochNum, setEpochValue] = useState(modelOptions.epochs + 1);
   const [neuronNumber, setNeuronNumber] = useState(modelOptions.neuronNumber);
   const [rateNumber, setRateNumber] = useState(modelOptions.learningRate);
-  const [testNumber, setTestNum] = useState(modelOptions.testNumber);
+  const [testNumber, setTestNumber] = useState(modelOptions.testNumber);
   const [showBatchTooltip, setShowBatchTooltip] = useState(false);
   const [showEpochTooltip, setShowEpochTooltip] = useState(false);
   const [showNeuronTooltip, setShowNeuronTooltip] = useState(false);
@@ -85,7 +91,6 @@ const DataSamplesPage = () => {
   const hasSufficientData = useHasSufficientDataForTraining(
     modelOptions.testNumber
   );
-  const hasFeatureActive = useHasFeatureActive(modelOptions.featuresActive);
   const isAddNewActionDisabled = actions.some((a) => a.name.length === 0);
 
   const maxTestSize = useMemo(() => {
@@ -194,7 +199,7 @@ const DataSamplesPage = () => {
                         color="white"
                         placement="top"
                         isOpen={showBatchTooltip}
-                        label={batch}
+                        label={modelOptions.batchSize}
                       >
                         <SliderThumb />
                       </Tooltip>
@@ -235,7 +240,7 @@ const DataSamplesPage = () => {
                         color="white"
                         placement="top"
                         isOpen={showEpochTooltip}
-                        label={epochNum === 1 ? epochNum : epochNum - 1}
+                        label={modelOptions.epochs}
                       >
                         <SliderThumb />
                       </Tooltip>
@@ -274,7 +279,7 @@ const DataSamplesPage = () => {
                         color="white"
                         placement="top"
                         isOpen={showRateTooltip}
-                        label={rateNumber}
+                        label={modelOptions.learningRate}
                       >
                         <SliderThumb />
                       </Tooltip>
@@ -312,7 +317,7 @@ const DataSamplesPage = () => {
                         color="white"
                         placement="top"
                         isOpen={showNeuronTooltip}
-                        label={neuronNumber}
+                        label={modelOptions.neuronNumber}
                       >
                         <SliderThumb />
                       </Tooltip>
@@ -350,7 +355,7 @@ const DataSamplesPage = () => {
                         color="white"
                         placement="top"
                         isOpen={showTestTooltip}
-                        label={testNumber}
+                        label={modelOptions.testNumber}
                       >
                         <SliderThumb />
                       </Tooltip>
@@ -382,7 +387,7 @@ const DataSamplesPage = () => {
                     }}
                     width="175px"
                     variant={
-                      hasSufficientData && hasFeatureActive
+                      hasSufficientData && modelOptions.featuresActive.size > 0
                         ? "primary"
                         : "secondary-disabled"
                     }
