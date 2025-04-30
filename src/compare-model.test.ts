@@ -164,6 +164,34 @@ afterAll(() => {
       originalAccuracy.map((x) => x.toFixed(4).padEnd(10, " ")).join("")
   );
   // … confidence and correct confidence sections …
+  lines.push("\nCONFIDENCE RESULTS:");
+  lines.push("Dataset:  Worst     Poor      OK        Good      Best      ");
+  lines.push(
+    "Current:  " +
+      meanConfidenceScores
+        .map((x) => parseFloat(x.toFixed(4)).toString().padEnd(10, " "))
+        .join("")
+  );
+  lines.push(
+    "Original: " +
+      originalConfidence
+        .map((x) => parseFloat(x.toFixed(4)).toString().padEnd(10, " "))
+        .join("")
+  );
+  lines.push("\nCORRECT CONFIDENCE RESULTS:");
+  lines.push("Dataset:  Worst     Poor      OK        Good      Best      ");
+  lines.push(
+    "Current:  " +
+      meanCorrectConfidenceScores
+        .map((x) => parseFloat(x.toFixed(4)).toString().padEnd(10, " "))
+        .join("")
+  );
+  lines.push(
+    "Original: " +
+      originalCorrectConfidence
+        .map((x) => parseFloat(x.toFixed(4)).toString().padEnd(10, " "))
+        .join("")
+  );
 
   fs.writeFileSync("comparisonLog.txt", lines.join("\n"));
   console.log("comparisonLog.txt written");

@@ -24,6 +24,7 @@ export const trainModel = async (
     data,
     dataWindow,
     modelOptions,
+    true,
     true
   );
   const model: tf.LayersModel = createModel(data, modelOptions);
@@ -56,6 +57,68 @@ function gaussianRandom(mean=0, stdev=1) {
   return z * stdev + mean;
 }
 
+// Generates rotCount new recordings for each recording passed
+// By rotating the recording in random angles first about the x axis, then y and z
+export const dataRotate = (origdata: ActionData[], rotCount: number = 3): ActionData[] => {
+  // maximum angle, in degrees, by which the data may be rotated in any axis, in degrees
+  const maxRot = 5.0;
+
+  return origdata.map((action) => ({
+    ...action,
+    recordings: action.recordings.flatMap((recording) => {
+      // Keep original recording
+      const out: typeof recording[] = [recording];
+      const { x, y, z } = recording.data;
+
+      for (let i = 0; i < rotCount; i++) {
+        const len = x.length
+        const newX: number[] = [];
+        const newY: number[] = [];
+        const newZ: number[] = [];
+
+        // Angles to rotate about each axis, uniformly random in [-maxRot, maxRot)
+        const angX = (Math.random() - 0.5) * 2 * maxRot;
+        const angY = (Math.random() - 0.5) * 2 * maxRot;
+        const angZ = (Math.random() - 0.5) * 2 * maxRot;
+
+        // Cosines and sines of each of these angles
+        const cX = Math.cos(angX * (Math.PI / 180));
+        const sX = Math.sin(angX * (Math.PI / 180));
+        const cY = Math.cos(angY * (Math.PI / 180));
+        const sY = Math.sin(angY * (Math.PI / 180));
+        const cZ = Math.cos(angZ * (Math.PI / 180));
+        const sZ = Math.sin(angZ * (Math.PI / 180));
+
+        for (let j = 0; j < len; j++) {
+          // Calculate new x, y, z values
+          // First rotate about x axis
+          let rotX_x = x[j];
+          let rotX_y = cX*y[j] - sX*z[j];
+          let rotX_z = sX*y[j] + cX*z[j];
+
+          // Then about y
+          let rotY_x = cY*rotX_x + sY*rotX_z;
+          let rotY_y = rotX_y;
+          let rotY_z = cY*rotX_z - sY*rotX_x;
+
+          // Then about z
+          let rotZ_x = cZ*rotY_x - sZ*rotY_y;
+          let rotZ_y = sZ*rotY_x + cZ*rotY_y;
+          let rotZ_z = rotY_z;
+
+          newX.push(rotZ_x); newY.push(rotZ_y); newZ.push(rotZ_z);
+        }
+
+        out.push(({
+          ...recording,
+          data: { x: newX, y: newY, z: newZ }
+        }));
+      }
+
+      return out;
+    })
+  }))
+}
 
 export const dataSynthesize = (
   origdata: ActionData[],
@@ -133,13 +196,16 @@ export const prepareFeaturesAndLabels = (
   actions: ActionData[],
   dataWindow: DataWindow,
   modelOptions: ModelOptions,
-  synthesize:boolean=false
+  synthesize:boolean=false,
+  rotate:boolean=false
 ): { features: number[][]; labels: number[][] } => {
   const features: number[][] = [];
   const labels: number[][] = [];
   const numActions = actions.length;
   if(synthesize)
     actions=dataSynthesize(actions,true,true,4,4);
+  if(rotate)
+    actions=dataRotate(actions)
   actions.forEach((action, index) => {
     action.recordings.forEach((recording) => {
       // Prepare features
