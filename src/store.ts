@@ -91,18 +91,52 @@ export interface ModelOptions {
   learningRate: number;
   neuronNumber: number;
   testNumber: number;
+  dropoutRate: number;
+  recurrentDropout: number;
+  filterSize: number;
+  poolSize: number;
+  kernelSize:number;
   featuresActive: Set<Filter>;
 }
-
-export const defaultModelOptions: ModelOptions = {
-  epochs: 160,
-  batchSize: 16,
-  learningRate: 0.1,
-  neuronNumber: 16,
+export const cnnModelOptions: ModelOptions = {
+  epochs: 80,
+  batchSize: 32,
+  learningRate: 0.002,
+  neuronNumber: 64,
   testNumber: 0,
+  dropoutRate: 0.05,
+  recurrentDropout: 0.05,
+  filterSize: 32,
+  poolSize: 2,
+  kernelSize: 3,
   featuresActive: mlSettings.includedFilters,
 };
-
+export const defaultModelOptions: ModelOptions = {
+  epochs: 200,
+  batchSize: 128,
+  learningRate: 0.4,
+  neuronNumber: 16,
+  testNumber: 0,
+  dropoutRate: 0.1,
+  recurrentDropout: 0.1,
+  filterSize: 0,
+  poolSize: 0,
+  kernelSize: 0,
+  featuresActive: mlSettings.includedFilters,
+};
+export const gruModelOptions: ModelOptions = {
+  epochs: 100,
+  batchSize: 16,
+  learningRate: 0.002,
+  neuronNumber: 16,
+  testNumber: 0,
+  dropoutRate: 0.1,
+  recurrentDropout: 0,
+  filterSize: 0,
+  poolSize: 0,
+  kernelSize: 0,
+  featuresActive: mlSettings.includedFilters,
+};
 interface PredictionResult {
   confidences: Confidences;
   detected: Action | undefined;
@@ -332,7 +366,6 @@ export interface Actions {
   setLearningRate(value: number): void;
   setNeuronNumber(value: number): void;
   setTestNumber(value: number): void;
-  toggleFeaturesActive(values: Set<Filter>): void;
   toggleAdvancedOptionsEnabled(): void;
   setFeaturesActive(values: Set<Filter>): void;
   resetModelOptions(): void;
@@ -784,33 +817,24 @@ const createMlStore = (logging: Logging) => {
             });
           },
 
-          toggleFeaturesActive(values: Set<Filter>) {
-            if (values.size > 0) {
-              const { modelClear } = get();
-              modelClear();
-            }
-            return set(({ modelOptions }) => {
-              const newModelOptions = modelOptions;
-              values.forEach((f) =>
-                modelOptions.featuresActive.has(f)
-                  ? newModelOptions.featuresActive.delete(f)
-                  : newModelOptions.featuresActive.add(f)
-              );
-              return { modelOptions: newModelOptions };
-            });
-          },
-
           setFeaturesActive(values: Set<Filter>) {
             return set(({ modelOptions }) => {
-              const newModelOptions = modelOptions;
-              newModelOptions.featuresActive = values;
-              return { modelOptions: newModelOptions };
+              return {
+                modelOptions: {
+                  ...modelOptions,
+                  featuresActive: values,
+                },
+              };
             });
           },
 
           toggleAdvancedOptionsEnabled() {
+            const { resetModelOptions } = get();
             return set(({ advancedOptionsEnabled }) => {
               const newAdvancedOptionsEnabled = !advancedOptionsEnabled;
+              if (!advancedOptionsEnabled) {
+                resetModelOptions();
+              }
               return { advancedOptionsEnabled: newAdvancedOptionsEnabled };
             });
           },
@@ -968,7 +992,6 @@ const createMlStore = (logging: Logging) => {
               actions,
               trainModel,
               modelOptions,
-              setActionName,
             } = get();
             if (
               !hasSufficientDataForTraining(actions, modelOptions.testNumber)
@@ -976,8 +999,7 @@ const createMlStore = (logging: Logging) => {
               set({
                 trainModelDialogStage: TrainModelDialogStage.InsufficientData,
               });
-            } else if (!hasFeatureActive(modelOptions.featuresActive)) {
-              setActionName(actions[0].ID, "Temp");
+            } else if (modelOptions.featuresActive.size === 0) {
               set({
                 trainModelDialogStage: TrainModelDialogStage.NoFeaturesActive,
               });
@@ -1667,14 +1689,6 @@ export const useHasSufficientDataForTraining = (
 ): boolean => {
   const actions = useStore((s) => s.actions);
   return hasSufficientDataForTraining(actions, testNumber);
-};
-
-export const useHasFeatureActive = (featuresActive: Set<Filter>): boolean => {
-  return hasFeatureActive(featuresActive);
-};
-
-const hasFeatureActive = (featuresActive: Set<Filter>): boolean => {
-  return featuresActive.size > 0;
 };
 
 export const useHasNoStoredData = (): boolean => {

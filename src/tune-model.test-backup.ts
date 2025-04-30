@@ -81,13 +81,10 @@ const searchGrid = async () => {
   const results: { [key: string]: number } = {};
 
   const epochOptions = [80, 120, 160, 200];
-  const batchSizes = [32];
-  const learningRates = [0.1, 0.2, 0.4];
-  const neuronCounts = [16, 32, 64];
-  const dropoutRates = [0, 0.1, 0.2];
-  const filterSizes = [32];
-  const kernelSizes = [3];
-  const poolSizes = [2];
+  const batchSizes = [16, 32];
+  const learningRates = [0.01, 0.1, 0.2]; // Could use something like [0.01, 0.05, 0.1]
+  const neuronCounts = [16, 32, 64]; // Could use something like [8, 16, 32]
+  const dropoutRates = [0, 0.05, 0.1, 0.2, 0.4]
   let i = 0;
 
   for (const epochs of epochOptions) {
@@ -95,9 +92,6 @@ const searchGrid = async () => {
       for (const learningRate of learningRates) {
         for (const neuronNumber of neuronCounts) {
           for (const dropoutRate of dropoutRates){
-          for (const filterSize of filterSizes){
-          for (const kernelSize of kernelSizes){
-          for (const poolSize of poolSizes){
           const config: ModelOptions = {
               epochs,
               batchSize,
@@ -105,10 +99,6 @@ const searchGrid = async () => {
               neuronNumber,
               testNumber: 0,
               dropoutRate,
-              recurrentDropout: 0,
-              filterSize,
-              kernelSize,
-              poolSize,
               featuresActive: mlSettings.includedFilters,
             };
 
@@ -116,10 +106,6 @@ const searchGrid = async () => {
             console.log(`[${++i}] Testing ${key}`);
             const avgAccuracy = await getAverageAccuracy(config);
             results[key] = avgAccuracy;
-          }
-          }
-          }
-
           }
         }
       }

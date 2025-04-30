@@ -23,8 +23,7 @@ export const trainModel = async (
   const { features, labels } = prepareFeaturesAndLabels(
     data,
     dataWindow,
-    modelOptions,
-    true
+    modelOptions
   );
   const model: tf.LayersModel = createModel(data, modelOptions);
 
@@ -37,109 +36,34 @@ export const trainModel = async (
       // as well train using all of it.
       validationSplit: 0,
       callbacks: {
-        onEpochEnd: (epoch: number) => {
-          // Epochs indexed at 0
-          onProgress && onProgress(epoch / (modelOptions.epochs - 1));
-        },
-      },
+              onEpochEnd: (epoch: number, logs?: tf.Logs) => {
+                const loss = logs?.loss?.toFixed(4);
+                const acc = (logs?.acc ?? logs?.accuracy)?.toFixed(4);
+                //console.log(
+                //  `Epoch ${epoch + 1}/${modelOptions.epochs} — loss=${loss}, accuracy=${acc}`
+                //);
+                if (onProgress) {
+                  onProgress(epoch / (modelOptions.epochs - 1));
+                }
+              },
+            },
     });
   } catch (err) {
     return { error: true };
   }
   return { error: false, model };
 };
-function gaussianRandom(mean=0, stdev=1) {
-  const u = 1 - Math.random(); // Converting [0,1) to (0,1]
-  const v = Math.random();
-  const z = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
-  // Transform to the desired mean and standard deviation:
-  return z * stdev + mean;
-}
-
-
-export const dataSynthesize = (
-  origdata: ActionData[],
-  // whether to apply Gaussian noise
-  dithering: boolean = true,
-  // whether to apply sinusoidal distortion
-  distortion: boolean = true,
-  // how many noisy copies to make when dithering-only
-  ditheringCount: number = 3,
-  // how many distorted copies to make when distortion-only
-  distortionCount: number = 3
-): ActionData[] => {
-  // tweak or pull these factors from modelOptions if you like
-  const noiseFactor = 0.02;
-  const distortionFactor = 0.1;
-
-  return origdata.map((action) => ({
-    ...action,
-    recordings: action.recordings.flatMap((recording) => {
-      // always keep the original
-      const out: typeof recording[] = [recording];
-      const { x, y, z } = recording.data;
-      const len = x.length;
-      // helper to build one synthetic recording
-      const makeSynthetic = (applyDither: boolean, applyDistort: boolean) => {
-        var localdistortion = gaussianRandom()*distortionFactor+1
-        const newX = x.map((v, i) => {
-          let nv = v;
-          if (applyDither)   nv += gaussianRandom() * noiseFactor;
-          if (applyDistort)  nv *= localdistortion;
-          return nv;
-        });
-        const newY = y.map((v, i) => {
-          let nv = v;
-          if (applyDither)   nv += gaussianRandom() * noiseFactor;
-          if (applyDistort)  nv *= localdistortion;
-          return nv;
-        });
-        const newZ = z.map((v, i) => {
-          let nv = v;
-          if (applyDither)   nv += gaussianRandom() * noiseFactor;
-          if (applyDistort)  nv *= localdistortion;
-          return nv;
-        });
-
-        return {
-          ...recording,
-          data: { x: newX, y: newY, z: newZ },
-        };
-      };
-
-      if (dithering && !distortion) {
-        for (let i = 0; i < ditheringCount; i++) {
-          out.push(makeSynthetic(true, false));
-        }
-      } else if (!dithering && distortion) {
-        for (let j = 0; j < distortionCount; j++) {
-          out.push(makeSynthetic(false, true));
-        }
-      } else if (dithering && distortion) {
-        for (let i = 0; i < ditheringCount; i++) {
-          for (let j = 0; j < distortionCount; j++) {
-            out.push(makeSynthetic(true, true));
-          }
-        }
-      }
-      // if both flags false, you’ll just get the original
-      return out;
-    }),
-  }));
-};
 
 // Exported for testing
 export const prepareFeaturesAndLabels = (
   actions: ActionData[],
   dataWindow: DataWindow,
-  modelOptions: ModelOptions,
-  synthesize:boolean=false
+  modelOptions: ModelOptions
 ): { features: number[][]; labels: number[][] } => {
   const features: number[][] = [];
   const labels: number[][] = [];
   const numActions = actions.length;
-  if(synthesize)
-    actions=dataSynthesize(actions,true,true,4,4);
+
   actions.forEach((action, index) => {
     action.recordings.forEach((recording) => {
       // Prepare features
@@ -161,23 +85,52 @@ const createModel = (
   actions: ActionData[],
   modelOptions: ModelOptions
 ): tf.LayersModel => {
-  const numberOfClasses: number = actions.length;
-  const inputShape = [
-    modelOptions.featuresActive.size * mlSettings.includedAxes.length,
-  ];
+  const numberOfClasses = actions.length;
+  // same flattened feature count as before
+  const flatDim =
+    modelOptions.featuresActive.size * mlSettings.includedAxes.length;
 
-  const input = tf.input({ shape: inputShape });
-  const normalizer = tf.layers.batchNormalization().apply(input);
+  // keep the original 1D input
+  const input = tf.input({ shape: [flatDim] });
+
+  // reshape into [timeSteps, 1] so conv1d can run along your feature “sequence”
+  const seq = tf.layers
+    .reshape({ targetShape: [flatDim, 1] })
+    .apply(input) as SymbolicTensor;
+
+  // 1D conv + pool
+  const filters = modelOptions.filterSize;
+  const kernel = modelOptions.kernelSize;
+  const poolSize = modelOptions.poolSize;
+  const conv = tf.layers
+    .conv1d({
+      filters,
+      kernelSize: kernel,
+      activation: "relu",
+      padding: "same",
+    })
+    .apply(seq) as SymbolicTensor;
+
+  const pool = tf.layers
+    .maxPooling1d({ poolSize })
+    .apply(conv) as SymbolicTensor;
+
+  // flatten back out to feed into your dense block
+  const flat = tf.layers.flatten().apply(pool) as SymbolicTensor;
+
   const dense = tf.layers
     .dense({ units: modelOptions.neuronNumber, activation: "relu" })
-    .apply(normalizer);
-  const dropout = tf.layers
+    .apply(flat) as SymbolicTensor;
+
+  const drop = tf.layers
     .dropout({ rate: modelOptions.dropoutRate })
     .apply(dense) as SymbolicTensor;
-  const softmax = tf.layers
+
+  const output = tf.layers
     .dense({ units: numberOfClasses, activation: "softmax" })
-    .apply(dropout) as SymbolicTensor;
-  const model = tf.model({ inputs: input, outputs: softmax });
+    .apply(drop) as SymbolicTensor;
+
+  const model = tf.model({ inputs: input, outputs: output });
 
   model.compile({
     loss: "categoricalCrossentropy",
@@ -187,6 +140,7 @@ const createModel = (
 
   return model;
 };
+
 
 const normalize = (value: number, min: number, max: number) => {
   const newMin = 0;
@@ -205,6 +159,7 @@ export const applyFilters = (
   if (x.length === 0 || y.length === 0 || z.length === 0) {
     throw new Error("Empty x/y/z data");
   }
+  
   const filters = getMlFilters(dataWindow);
   return Array.from(modelOptions.featuresActive).reduce((acc, filter) => {
     const { strategy, min, max } = filters[filter];

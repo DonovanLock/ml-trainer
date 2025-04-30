@@ -12,9 +12,9 @@ import * as tf from "@tensorflow/tfjs";
 import * as fs from "fs";
 import { beforeAll, afterAll, describe, test, expect } from "vitest";
 
-import { prepareFeaturesAndLabels, trainModel } from "./ml";
+import { prepareFeaturesAndLabels, trainModel } from "./ml-cnn";
 import { ActionData } from "./model";
-import { currentDataWindow, defaultModelOptions } from "./store";
+import { currentDataWindow, defaultModelOptions, cnnModelOptions } from "./store";
 
 import trainingData from "./test-fixtures/comparison-data/training-data.json";
 import bestTestData  from "./test-fixtures/comparison-data/test-data-best.json";
@@ -47,7 +47,7 @@ beforeAll(
     trainingResult = await trainModel(
       fixUpTestData(trainingData),
       currentDataWindow,
-      defaultModelOptions
+      cnnModelOptions
     );
   },
   1000000
@@ -58,7 +58,7 @@ const getModelResults = (data: ActionData[]) => {
   const { features, labels } = prepareFeaturesAndLabels(
     data,
     currentDataWindow,
-    defaultModelOptions
+    cnnModelOptions
   );
 
   if (trainingResult.error) {
