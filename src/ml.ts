@@ -59,7 +59,10 @@ function gaussianRandom(mean=0, stdev=1) {
 
 // Generates rotCount new recordings for each recording passed
 // By rotating the recording in random angles first about the x axis, then y and z
-export const dataRotate = (origdata: ActionData[], rotCount: number = 3): ActionData[] => {
+export const dataRotate = (
+  origdata: ActionData[],
+  rotCount: number = 3
+): ActionData[] => {
   // maximum angle, in degrees, by which the data may be rotated in any axis, in degrees
   const maxRot = 5.0;
 
@@ -71,7 +74,7 @@ export const dataRotate = (origdata: ActionData[], rotCount: number = 3): Action
       const { x, y, z } = recording.data;
 
       for (let i = 0; i < rotCount; i++) {
-        const len = x.length
+        const len = x.length;
         const newX: number[] = [];
         const newY: number[] = [];
         const newZ: number[] = [];
@@ -82,43 +85,46 @@ export const dataRotate = (origdata: ActionData[], rotCount: number = 3): Action
         const angZ = (Math.random() - 0.5) * 2 * maxRot;
 
         // Cosines and sines of each of these angles
-        const cX = Math.cos(angX * (Math.PI / 180));
-        const sX = Math.sin(angX * (Math.PI / 180));
-        const cY = Math.cos(angY * (Math.PI / 180));
-        const sY = Math.sin(angY * (Math.PI / 180));
-        const cZ = Math.cos(angZ * (Math.PI / 180));
-        const sZ = Math.sin(angZ * (Math.PI / 180));
+        const radX = angX * (Math.PI / 180);
+        const radY = angY * (Math.PI / 180);
+        const radZ = angZ * (Math.PI / 180);
+
+        const cX = Math.cos(radX), sX = Math.sin(radX);
+        const cY = Math.cos(radY), sY = Math.sin(radY);
+        const cZ = Math.cos(radZ), sZ = Math.sin(radZ);
 
         for (let j = 0; j < len; j++) {
           // Calculate new x, y, z values
           // First rotate about x axis
-          let rotX_x = x[j];
-          let rotX_y = cX*y[j] - sX*z[j];
-          let rotX_z = sX*y[j] + cX*z[j];
+          const rotX_x = x[j];
+          const rotX_y = cX * y[j] - sX * z[j];
+          const rotX_z = sX * y[j] + cX * z[j];
 
           // Then about y
-          let rotY_x = cY*rotX_x + sY*rotX_z;
-          let rotY_y = rotX_y;
-          let rotY_z = cY*rotX_z - sY*rotX_x;
+          const rotY_x = cY * rotX_x + sY * rotX_z;
+          const rotY_y = rotX_y;
+          const rotY_z = cY * rotX_z - sY * rotX_x;
 
           // Then about z
-          let rotZ_x = cZ*rotY_x - sZ*rotY_y;
-          let rotZ_y = sZ*rotY_x + cZ*rotY_y;
-          let rotZ_z = rotY_z;
+          const rotZ_x = cZ * rotY_x - sZ * rotY_y;
+          const rotZ_y = sZ * rotY_x + cZ * rotY_y;
+          const rotZ_z = rotY_z;
 
-          newX.push(rotZ_x); newY.push(rotZ_y); newZ.push(rotZ_z);
+          newX.push(rotZ_x);
+          newY.push(rotZ_y);
+          newZ.push(rotZ_z);
         }
 
-        out.push(({
+        out.push({
           ...recording,
           data: { x: newX, y: newY, z: newZ }
-        }));
+        });
       }
 
       return out;
     })
-  }))
-}
+  }));
+};
 
 export const dataSynthesize = (
   origdata: ActionData[],
