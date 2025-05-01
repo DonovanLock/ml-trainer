@@ -107,7 +107,7 @@ const FilterFeaturesDialogBox = () => {
     closeDialog();
   }, [closeDialog, featuresState, setFeaturesActive]);
   const leastDestructiveRef = useRef<HTMLButtonElement>(null);
-  const heading = <Text>Select which featuers you want active</Text>;
+  const heading = <Text>Select which features you want active</Text>;
 
   return (
     <AlertDialog

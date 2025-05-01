@@ -99,7 +99,7 @@ const LiveGraphPanel = ({
           <MicrobitWarningIllustration
             display={{ base: "none", sm: "block" }}
           />
-          <VStack gap={3} alignItems="self-start">
+          <VStack gap={{ base: 1.5, sm: 3 }} alignItems={{ base: "center", sm: "self-start" }}>
             <Text fontWeight="bold">
               <FormattedMessage id="microbit-not-connected" />
             </Text>

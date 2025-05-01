@@ -8,6 +8,7 @@ import {
   CardBody,
   CloseButton,
   HStack,
+  Stack,
   Input,
   useToast,
 } from "@chakra-ui/react";
@@ -126,7 +127,7 @@ const ActionNameCard = ({
         />
       )}
       <CardBody p={0} alignContent="center">
-        <HStack>
+        <Stack direction={{ base: "column", md: "row" }} align={{ base: "self-start", md: "center" }}>
           <HStack>
             {readOnly ? (
               <LedIcon icon={icon} isTriggered={isTriggered} />
@@ -157,7 +158,7 @@ const ActionNameCard = ({
             })}
             onChange={onChange}
           />
-        </HStack>
+        </Stack>
       </CardBody>
     </Card>
   );
