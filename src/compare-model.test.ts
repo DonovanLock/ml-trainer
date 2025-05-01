@@ -4,36 +4,26 @@
  * SPDX-License-Identifier: MIT
  */
 
-
-/////////////////////
-// TESTING SETUP
-/////////////////////
 import * as tf from "@tensorflow/tfjs";
 import * as fs from "fs";
 import { beforeAll, afterAll, describe, test, expect } from "vitest";
-
 import { prepareFeaturesAndLabels, trainModel } from "./ml";
 import { ActionData } from "./model";
 import { currentDataWindow, defaultModelOptions } from "./store";
-
 import trainingData from "./test-fixtures/comparison-data/training-data.json";
-import bestTestData  from "./test-fixtures/comparison-data/test-data-best.json";
-import goodTestData  from "./test-fixtures/comparison-data/test-data-good.json";
-import okTestData    from "./test-fixtures/comparison-data/test-data-ok.json";
-import poorTestData  from "./test-fixtures/comparison-data/test-data-poor.json";
+import bestTestData from "./test-fixtures/comparison-data/test-data-best.json";
+import goodTestData from "./test-fixtures/comparison-data/test-data-good.json";
+import okTestData from "./test-fixtures/comparison-data/test-data-ok.json";
+import poorTestData from "./test-fixtures/comparison-data/test-data-poor.json";
 import worstTestData from "./test-fixtures/comparison-data/test-data-worst.json";
-
 import {
   originalAccuracy,
   originalConfidence,
   originalCorrectConfidence,
 } from "./test-fixtures/comparison-data/original-stats.json";
-
 import { generateDate } from "./utils/date-time-generator";
-import { defineConfig } from 'vitest/config';
 
-
-// ensure each ActionData has an icon
+// Ensure each ActionData has an icon
 const fixUpTestData = (data: Partial<ActionData>[]): ActionData[] => {
   data.forEach((action) => (action.icon = "Heart"));
   return data as ActionData[];
@@ -41,20 +31,17 @@ const fixUpTestData = (data: Partial<ActionData>[]): ActionData[] => {
 
 let trainingResult: Awaited<ReturnType<typeof trainModel>>;
 
-beforeAll(
-  async () => {
-    await tf.setBackend("cpu");
-    trainingResult = await trainModel(
-      fixUpTestData(trainingData),
-      currentDataWindow,
-      defaultModelOptions
-    );
-  },
-  1000000
-);
+beforeAll(async () => {
+  await tf.setBackend("cpu");
+  trainingResult = await trainModel(
+    fixUpTestData(trainingData),
+    currentDataWindow,
+    defaultModelOptions
+  );
+}, 1000000);
 
 const getModelResults = (data: ActionData[]) => {
-  // prepare 3D sequences & one‑hot labels
+  // Prepare 3D sequences & one-hot labels
   const { features, labels } = prepareFeaturesAndLabels(
     data,
     currentDataWindow,
@@ -65,10 +52,10 @@ const getModelResults = (data: ActionData[]) => {
     throw new Error("No model returned");
   }
 
-  const xs = tf.tensor2d(features); 
-  const ys = tf.tensor2d(labels);   
+  const xs = tf.tensor2d(features);
+  const ys = tf.tensor2d(labels);
 
-  const [lossT, accT] = trainingResult.model.evaluate(xs, ys) as tf.Scalar[];
+  const [, accT] = trainingResult.model.evaluate(xs, ys) as tf.Scalar[];
   const tensorFlowResultAccuracy = accT.dataSync()[0].toFixed(4);
 
   const predT = trainingResult.model.predict(xs) as tf.Tensor;
@@ -110,7 +97,11 @@ const compareModel = (message: string, idx: number) => {
       let totalCorrConf = 0;
       let correctCount = 0;
 
-      for (let i = 0, j = 0; i < tensorflowPredictionResult.length; i += d, j++) {
+      for (
+        let i = 0, j = 0;
+        i < tensorflowPredictionResult.length;
+        i += d, j++
+      ) {
         const probs = tensorflowPredictionResult.slice(i, i + d);
         const trueIdx = labels[j].indexOf(1);
         totalConf += probs[trueIdx];
@@ -133,7 +124,9 @@ const compareModel = (message: string, idx: number) => {
     });
 
     test("Confidence check", () => {
-      expect(meanConfidenceScores[idx]).toBeGreaterThanOrEqual(originalConfidence[idx]);
+      expect(meanConfidenceScores[idx]).toBeGreaterThanOrEqual(
+        originalConfidence[idx]
+      );
     });
 
     test("Correct confidence check", () => {
@@ -145,10 +138,10 @@ const compareModel = (message: string, idx: number) => {
 };
 
 compareModel("Testing on the worst dataset", 0);
-compareModel("Testing on the poor dataset",  1);
-compareModel("Testing on the OK dataset",    2);
-compareModel("Testing on the good dataset",  3);
-compareModel("Testing on the best dataset",  4);
+compareModel("Testing on the poor dataset", 1);
+compareModel("Testing on the OK dataset", 2);
+compareModel("Testing on the good dataset", 3);
+compareModel("Testing on the best dataset", 4);
 
 afterAll(() => {
   const lines: string[] = [];

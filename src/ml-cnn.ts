@@ -36,17 +36,17 @@ export const trainModel = async (
       // as well train using all of it.
       validationSplit: 0,
       callbacks: {
-              onEpochEnd: (epoch: number, logs?: tf.Logs) => {
-                const loss = logs?.loss?.toFixed(4);
-                const acc = (logs?.acc ?? logs?.accuracy)?.toFixed(4);
-                //console.log(
-                //  `Epoch ${epoch + 1}/${modelOptions.epochs} — loss=${loss}, accuracy=${acc}`
-                //);
-                if (onProgress) {
-                  onProgress(epoch / (modelOptions.epochs - 1));
-                }
-              },
-            },
+        onEpochEnd: (epoch: number, _logs?: tf.Logs) => {
+          // const loss = logs?.loss?.toFixed(4);
+          // const acc = (logs?.acc ?? logs?.accuracy)?.toFixed(4);
+          // console.log(
+          //   `Epoch ${epoch + 1}/${modelOptions.epochs} — loss=${loss}, accuracy=${acc}`
+          // );
+          if (onProgress) {
+            onProgress(epoch / (modelOptions.epochs - 1));
+          }
+        },
+      },
     });
   } catch (err) {
     return { error: true };
@@ -72,8 +72,7 @@ export const prepareFeaturesAndLabels = (
       );
 
       // Prepare labels
-      const label: number[] = new Array(numActions) as number[];
-      label.fill(0, 0, numActions);
+      const label: number[] = Array<number>(numActions).fill(0);
       label[index] = 1;
       labels.push(label);
     });
@@ -102,6 +101,7 @@ const createModel = (
   const filters = modelOptions.filterSize;
   const kernel = modelOptions.kernelSize;
   const poolSize = modelOptions.poolSize;
+
   const conv = tf.layers
     .conv1d({
       filters,
@@ -141,7 +141,6 @@ const createModel = (
   return model;
 };
 
-
 const normalize = (value: number, min: number, max: number) => {
   const newMin = 0;
   const newMax = 1;
@@ -159,7 +158,7 @@ export const applyFilters = (
   if (x.length === 0 || y.length === 0 || z.length === 0) {
     throw new Error("Empty x/y/z data");
   }
-  
+
   const filters = getMlFilters(dataWindow);
   return Array.from(modelOptions.featuresActive).reduce((acc, filter) => {
     const { strategy, min, max } = filters[filter];
