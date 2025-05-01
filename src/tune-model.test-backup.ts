@@ -4,7 +4,7 @@ import * as tf from "@tensorflow/tfjs";
 import * as fs from "fs";
 import { prepareFeaturesAndLabels, trainModel } from "./ml";
 import { ActionData } from "./model";
-import { currentDataWindow, defaultModelOptions, ModelOptions } from "./store";
+import { currentDataWindow, ModelOptions } from "./store";
 import { mlSettings } from "./mlConfig";
 import trainingData from "./test-fixtures/comparison-data/training-data.json";
 import bestTestData from "./test-fixtures/comparison-data/test-data-best.json";
@@ -19,11 +19,13 @@ const maxRunTime = 60 * 60 * 1000; // 1 hour
 let sortedResults: string[] = [];
 
 const fixUpTestData = (data: Partial<ActionData>[]): ActionData[] => {
-  data.forEach((action) => (action.icon = "Heart"));
+  data.forEach(action => {
+    action.icon = "Heart";
+  });
   return data as ActionData[];
 };
 
-const testData = [
+const testData: ActionData[][] = [
   fixUpTestData(worstTestData),
   fixUpTestData(poorTestData),
   fixUpTestData(okTestData),
@@ -37,7 +39,7 @@ const testData = [
  * @param options - The ModelOptions to use for training.
  * @returns {Promise<number>} - The average accuracy of the model on the test data.
  */
-const getAverageAccuracy = async (options: ModelOptions) => {
+const getAverageAccuracy = async (options: ModelOptions): Promise<number> => {
   const train = await trainModel(
     fixUpTestData(trainingData),
     currentDataWindow,
@@ -77,14 +79,14 @@ const getAverageAccuracy = async (options: ModelOptions) => {
  * @returns {Promise<void>} - A promise that resolves when the search is complete.
  * The results are saved to a file named "tuningResults.txt".
  */
-const searchGrid = async () => {
+const searchGrid = async (): Promise<void> => {
   const results: { [key: string]: number } = {};
 
   const epochOptions = [80, 120, 160, 200];
   const batchSizes = [16, 32];
   const learningRates = [0.01, 0.1, 0.2]; // Could use something like [0.01, 0.05, 0.1]
   const neuronCounts = [16, 32, 64]; // Could use something like [8, 16, 32]
-  const dropoutRates = [0, 0.05, 0.1, 0.2, 0.4]
+  const dropoutRates = [0, 0.05, 0.1, 0.2, 0.4];
   let i = 0;
 
   for (const epochs of epochOptions) {
@@ -144,7 +146,7 @@ afterAll(() => {
     lines.push(result);
   }
 
-  fs.writeFile("tuningResults.txt", lines.join("\n"), (err) => {
+  fs.writeFile("tuningResults.txt", lines.join("\n"), err => {
     if (err) {
       return console.error("Error writing to comparisonLog.txt: ", err);
     }
