@@ -795,6 +795,10 @@
     "defaultMessage": "翻訳を手伝う",
     "description": "Help translate  menu option text"
   },
+  "hide-graphs-action": {
+    "defaultMessage": "Hide graphs",
+    "description": "Hide graphs menu item text"
+  },
   "home-action": {
     "defaultMessage": "ホーム",
     "description": "Home button text"
@@ -1434,6 +1438,10 @@
   "settings-menu-action": {
     "defaultMessage": "設定アクションメニュー",
     "description": "Label for settings actions menu button"
+  },
+  "show-graphs-action": {
+    "defaultMessage": "Show graphs",
+    "description": "Show graphs menu item text"
   },
   "show-graphs-checkbox-label-text": {
     "defaultMessage": "グラフを表示",

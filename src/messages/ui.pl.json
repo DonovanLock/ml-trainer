@@ -1349,6 +1349,12 @@
       "value": "Pomóż tłumaczyć"
     }
   ],
+  "hide-graphs-action": [
+    {
+      "type": 0,
+      "value": "Hide graphs"
+    }
+  ],
   "home-action": [
     {
       "type": 0,
@@ -2527,6 +2533,12 @@
     {
       "type": 0,
       "value": "Ustawienia menu akcji"
+    }
+  ],
+  "show-graphs-action": [
+    {
+      "type": 0,
+      "value": "Show graphs"
     }
   ],
   "show-graphs-checkbox-label-text": [

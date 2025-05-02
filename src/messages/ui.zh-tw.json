@@ -1345,6 +1345,12 @@
       "value": "說明翻譯"
     }
   ],
+  "hide-graphs-action": [
+    {
+      "type": 0,
+      "value": "Hide graphs"
+    }
+  ],
   "home-action": [
     {
       "type": 0,
@@ -2523,6 +2529,12 @@
     {
       "type": 0,
       "value": "設定動作選單"
+    }
+  ],
+  "show-graphs-action": [
+    {
+      "type": 0,
+      "value": "Show graphs"
     }
   ],
   "show-graphs-checkbox-label-text": [

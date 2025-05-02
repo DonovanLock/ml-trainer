@@ -161,7 +161,12 @@ const DataSamplesPage = () => {
                 <FormattedMessage id="add-action-action" />
               </Button>
             </HStack>
-            <HStack gap={6}>
+            <HStack
+              gap={6}
+              marginLeft="auto"
+              overflowX="auto"
+              whiteSpace="nowrap"
+            >
               <VStack>
                 {advancedOptionsEnabled ? (
                   <Button onClick={handleReset} variant="secondary">
