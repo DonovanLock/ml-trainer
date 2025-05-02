@@ -127,7 +127,10 @@ const ActionNameCard = ({
         />
       )}
       <CardBody p={0} alignContent="center">
-        <Stack direction={{ base: "column", md: "row" }} align={{ base: "self-start", md: "center" }}>
+        <Stack
+          direction={{ base: "column", md: "row" }}
+          align={{ base: "self-start", md: "center" }}
+        >
           <HStack>
             {readOnly ? (
               <LedIcon icon={icon} isTriggered={isTriggered} />

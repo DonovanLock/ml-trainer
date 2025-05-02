@@ -9,7 +9,7 @@ import { FormattedMessage } from "react-intl";
 import { DataSamplesView } from "../model";
 import { useStore } from "../store";
 import { IconButton } from "@chakra-ui/react";
-import { RiEyeLine, RiEyeOffLine, RiFileChart2Fill, RiLineChartFill, RiLineChartLine } from "react-icons/ri";
+import { RiFileChart2Fill } from "react-icons/ri";
 
 const ShowGraphsCheckbox = () => {
   const { dataSamplesView, showGraphs } = useStore((s) => s.settings);
@@ -31,8 +31,8 @@ const ShowGraphsCheckbox = () => {
 
   return (
     <>
-      {dataSamplesView !== DataSamplesView.Graph && (
-        useBreakpointValue({ "base": "base", "md": "md"}) === "base" ? (
+      {dataSamplesView !== DataSamplesView.Graph &&
+        (useBreakpointValue({ base: "base", md: "md" }) === "base" ? (
           <IconButton
             aria-label="Toggle show graphs"
             icon={<RiFileChart2Fill />}
@@ -47,8 +47,7 @@ const ShowGraphsCheckbox = () => {
           <Checkbox isChecked={showGraphs} onChange={handleShowGraphOnChange}>
             <FormattedMessage id="show-graphs-checkbox-label-text" />
           </Checkbox>
-        )
-      )}
+        ))}
     </>
   );
 };

@@ -39,17 +39,17 @@ const LedIconSvg = ({ icon }: LedIconSvg) => {
       viewBox={`0 0 ${size} ${size}`}
     >
       <g>
-        {
-          Array.from({length: pixelCountRow * pixelCountRow}).map((_, i) => (
-            <rect
-              width={pixelSize}
-              height={pixelSize}
-              rx="2"
-              transform={`translate(${(i % 5) * (pixelSize + padding)} ${Math.floor(i / 5) * (pixelSize + padding)})`}
-              fill={getFill(iconData[i])}
-            />
-          ))
-        }
+        {Array.from({ length: pixelCountRow * pixelCountRow }).map((_, i) => (
+          <rect
+            width={pixelSize}
+            height={pixelSize}
+            rx="2"
+            transform={`translate(${(i % 5) * (pixelSize + padding)} ${
+              Math.floor(i / 5) * (pixelSize + padding)
+            })`}
+            fill={getFill(iconData[i])}
+          />
+        ))}
       </g>
     </svg>
   );
