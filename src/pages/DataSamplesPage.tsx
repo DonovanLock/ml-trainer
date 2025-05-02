@@ -167,17 +167,13 @@ const DataSamplesPage = () => {
               overflowX="auto"
               whiteSpace="nowrap"
             >
-              <VStack>
-                {advancedOptionsEnabled ? (
-                  <Button onClick={handleReset} variant="secondary">
-                    Reset Sliders
-                  </Button>
-                ) : (
-                  <></>
-                )}
-              </VStack>
-              <VStack>
-                {advancedOptionsEnabled ? (
+              {advancedOptionsEnabled && (
+                <>
+                  <VStack>
+                    <Button onClick={handleReset} variant="secondary">
+                      Reset Sliders
+                    </Button>
+                  </VStack>
                   <VStack>
                     <Text>Batch Size</Text>
                     <Slider
@@ -210,12 +206,6 @@ const DataSamplesPage = () => {
                       </Tooltip>
                     </Slider>
                   </VStack>
-                ) : (
-                  <></>
-                )}
-              </VStack>
-              <VStack>
-                {advancedOptionsEnabled ? (
                   <VStack>
                     <Text textStyle="sm">Epoch Number</Text>
                     <Slider
@@ -251,12 +241,6 @@ const DataSamplesPage = () => {
                       </Tooltip>
                     </Slider>
                   </VStack>
-                ) : (
-                  <></>
-                )}
-              </VStack>
-              <VStack>
-                {advancedOptionsEnabled ? (
                   <VStack>
                     <Text textStyle="sm">Learning Rate</Text>
                     <Slider
@@ -290,12 +274,6 @@ const DataSamplesPage = () => {
                       </Tooltip>
                     </Slider>
                   </VStack>
-                ) : (
-                  <></>
-                )}
-              </VStack>
-              <VStack>
-                {advancedOptionsEnabled ? (
                   <VStack>
                     <Text textStyle="sm">Neuron Number</Text>
                     <Slider
@@ -328,12 +306,6 @@ const DataSamplesPage = () => {
                       </Tooltip>
                     </Slider>
                   </VStack>
-                ) : (
-                  <></>
-                )}
-              </VStack>
-              <VStack>
-                {advancedOptionsEnabled ? (
                   <VStack>
                     <Text textStyle="sm">No. Testing Samples</Text>
                     <Slider
@@ -366,10 +338,8 @@ const DataSamplesPage = () => {
                       </Tooltip>
                     </Slider>
                   </VStack>
-                ) : (
-                  <></>
-                )}
-              </VStack>
+                </>
+              )}
               {model ? (
                 <HStack>
                   <Button

@@ -35,7 +35,7 @@ const LedIconPicker = ({ actionName, onIconSelected }: LedIconPicker) => {
   );
 
   return (
-    <Popover placement="right-start" isLazy lazyBehavior="keepMounted">
+    <Popover placement="bottom-start" isLazy lazyBehavior="keepMounted">
       {({ onClose }) => (
         <>
           <PopoverTrigger>
@@ -75,8 +75,8 @@ const LedIconPicker = ({ actionName, onIconSelected }: LedIconPicker) => {
                       )}
                       onClick={() => handleClick(icon as MakeCodeIcon, onClose)}
                       variant="unstyled"
-                      h={20}
-                      w={20}
+                      w={{ base: 10, md: 20 }}
+                      h={{ base: 10, md: 20 }}
                       icon={<LedIconSvg icon={icon as MakeCodeIcon} />}
                     />
                   ))}
