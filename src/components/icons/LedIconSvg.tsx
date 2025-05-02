@@ -41,6 +41,7 @@ const LedIconSvg = ({ icon }: LedIconSvg) => {
       <g>
         {Array.from({ length: pixelCountRow * pixelCountRow }).map((_, i) => (
           <rect
+            key={i}
             width={pixelSize}
             height={pixelSize}
             rx="2"

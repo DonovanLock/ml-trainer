@@ -13,6 +13,7 @@ const ShowGraphsCheckbox = () => {
   const { dataSamplesView, showGraphs } = useStore((s) => s.settings);
   const setDataSamplesView = useStore((s) => s.setDataSamplesView);
   const setShowGraphs = useStore((s) => s.setShowGraphs);
+  const breakpoint = useBreakpointValue({ base: "base", md: "md" });
 
   const handleShowGraphOnChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,12 +30,11 @@ const ShowGraphsCheckbox = () => {
 
   return (
     <>
-      {dataSamplesView !== DataSamplesView.Graph &&
-        useBreakpointValue({ base: "base", md: "md" }) === "md" && (
-          <Checkbox isChecked={showGraphs} onChange={handleShowGraphOnChange}>
-            <FormattedMessage id="show-graphs-checkbox-label-text" />
-          </Checkbox>
-        )}
+      {dataSamplesView !== DataSamplesView.Graph && breakpoint === "md" && (
+        <Checkbox isChecked={showGraphs} onChange={handleShowGraphOnChange}>
+          <FormattedMessage id="show-graphs-checkbox-label-text" />
+        </Checkbox>
+      )}
     </>
   );
 };
