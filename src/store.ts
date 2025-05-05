@@ -85,6 +85,13 @@ export const currentDataWindow: DataWindow = {
   deviceSamplesLength: 50, // Number of samples required at 20 ms intervals for 1 second of data.
 };
 
+export const enum ModelTypes {
+  CNN = "CNN",
+  GRU = "GRU",
+  LOGREG = "LOGREG",
+  DEFAULT = "DEFAULT",
+};
+
 export interface ModelOptions {
   epochs: number;
   batchSize: number;
@@ -95,8 +102,9 @@ export interface ModelOptions {
   recurrentDropout: number;
   filterSize: number;
   poolSize: number;
-  kernelSize:number;
+  kernelSize: number;
   featuresActive: Set<Filter>;
+  modelType: ModelTypes;
 }
 export const cnnModelOptions: ModelOptions = {
   epochs: 80,
@@ -110,6 +118,7 @@ export const cnnModelOptions: ModelOptions = {
   poolSize: 2,
   kernelSize: 3,
   featuresActive: mlSettings.includedFilters,
+  modelType: ModelTypes.CNN,
 };
 export const defaultModelOptions: ModelOptions = {
   epochs: 200,
@@ -123,6 +132,7 @@ export const defaultModelOptions: ModelOptions = {
   poolSize: 0,
   kernelSize: 0,
   featuresActive: mlSettings.includedFilters,
+  modelType: ModelTypes.DEFAULT,
 };
 export const gruModelOptions: ModelOptions = {
   epochs: 100,
@@ -136,6 +146,7 @@ export const gruModelOptions: ModelOptions = {
   poolSize: 0,
   kernelSize: 0,
   featuresActive: mlSettings.includedFilters,
+  modelType: ModelTypes.GRU,
 };
 interface PredictionResult {
   confidences: Confidences;
@@ -1689,6 +1700,11 @@ export const useHasSufficientDataForTraining = (
 ): boolean => {
   const actions = useStore((s) => s.actions);
   return hasSufficientDataForTraining(actions, testNumber);
+};
+
+export const useHasFeatureActive = (): boolean => {
+  const modelOptions = useStore((s) => s.modelOptions);
+  return modelOptions.featuresActive.size > 0;
 };
 
 export const useHasNoStoredData = (): boolean => {
