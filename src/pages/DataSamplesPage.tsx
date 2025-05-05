@@ -84,7 +84,7 @@ const DataSamplesPage = () => {
   const hasSufficientData = useHasSufficientDataForTraining(
     modelOptions.testNumber
   );
-  const hasFeatureActive = useHasFeatureActive(modelOptions.featuresActive);
+  const hasFeatureActive = useHasFeatureActive();
   const isAddNewActionDisabled = actions.some((a) => a.name.length === 0);
 
   const maxTestSize = useMemo(() => {
