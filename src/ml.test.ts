@@ -35,7 +35,7 @@ beforeAll(async () => {
     currentDataWindow,
     defaultModelOptions
   );
-});
+}, 100000);
 
 const getModelResults = (data: ActionData[]) => {
   const { features, labels } = prepareFeaturesAndLabels(

@@ -4,7 +4,7 @@ import * as tf from "@tensorflow/tfjs";
 import * as fs from "fs";
 import { prepareFeaturesAndLabels, trainModel } from "./ml";
 import { ActionData } from "./model";
-import { currentDataWindow, defaultModelOptions, ModelOptions } from "./store";
+import { currentDataWindow, ModelOptions, ModelTypes } from "./store";
 import { mlSettings } from "./mlConfig";
 import trainingData from "./test-fixtures/comparison-data/training-data.json";
 import bestTestData from "./test-fixtures/comparison-data/test-data-best.json";
@@ -94,32 +94,32 @@ const searchGrid = async () => {
     for (const batchSize of batchSizes) {
       for (const learningRate of learningRates) {
         for (const neuronNumber of neuronCounts) {
-          for (const dropoutRate of dropoutRates){
-          for (const filterSize of filterSizes){
-          for (const kernelSize of kernelSizes){
-          for (const poolSize of poolSizes){
-          const config: ModelOptions = {
-              epochs,
-              batchSize,
-              learningRate,
-              neuronNumber,
-              testNumber: 0,
-              dropoutRate,
-              recurrentDropout: 0,
-              filterSize,
-              kernelSize,
-              poolSize,
-              featuresActive: mlSettings.includedFilters,
-            };
+          for (const dropoutRate of dropoutRates) {
+            for (const filterSize of filterSizes) {
+              for (const kernelSize of kernelSizes) {
+                for (const poolSize of poolSizes) {
+                  const config: ModelOptions = {
+                    epochs,
+                    batchSize,
+                    learningRate,
+                    neuronNumber,
+                    testNumber: 0,
+                    dropoutRate,
+                    recurrentDropout: 0,
+                    filterSize,
+                    kernelSize,
+                    poolSize,
+                    featuresActive: mlSettings.includedFilters,
+                    modelType: ModelTypes.DEFAULT,
+                  };
 
-            const key = `epochs=${epochs},batchSize=${batchSize},lr=${learningRate},neurons=${neuronNumber},dropout=${dropoutRate}`;
-            console.log(`[${++i}] Testing ${key}`);
-            const avgAccuracy = await getAverageAccuracy(config);
-            results[key] = avgAccuracy;
-          }
-          }
-          }
-
+                  const key = `epochs=${epochs},batchSize=${batchSize},lr=${learningRate},neurons=${neuronNumber},dropout=${dropoutRate}`;
+                  console.log(`[${++i}] Testing ${key}`);
+                  const avgAccuracy = await getAverageAccuracy(config);
+                  results[key] = avgAccuracy;
+                }
+              }
+            }
           }
         }
       }

@@ -49,10 +49,10 @@ export const trainModel = async (
   }
   return { error: false, model };
 };
-function gaussianRandom(mean=0, stdev=1) {
+function gaussianRandom(mean = 0, stdev = 1) {
   const u = 1 - Math.random(); // Converting [0,1) to (0,1]
   const v = Math.random();
-  const z = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+  const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
   // Transform to the desired mean and standard deviation:
   return z * stdev + mean;
 }
@@ -70,7 +70,7 @@ export const dataRotate = (
     ...action,
     recordings: action.recordings.flatMap((recording) => {
       // Keep original recording
-      const out: typeof recording[] = [recording];
+      const out: (typeof recording)[] = [recording];
       const { x, y, z } = recording.data;
 
       for (let i = 0; i < rotCount; i++) {
@@ -89,9 +89,12 @@ export const dataRotate = (
         const radY = angY * (Math.PI / 180);
         const radZ = angZ * (Math.PI / 180);
 
-        const cX = Math.cos(radX), sX = Math.sin(radX);
-        const cY = Math.cos(radY), sY = Math.sin(radY);
-        const cZ = Math.cos(radZ), sZ = Math.sin(radZ);
+        const cX = Math.cos(radX),
+          sX = Math.sin(radX);
+        const cY = Math.cos(radY),
+          sY = Math.sin(radY);
+        const cZ = Math.cos(radZ),
+          sZ = Math.sin(radZ);
 
         for (let j = 0; j < len; j++) {
           // Calculate new x, y, z values
@@ -117,12 +120,12 @@ export const dataRotate = (
 
         out.push({
           ...recording,
-          data: { x: newX, y: newY, z: newZ }
+          data: { x: newX, y: newY, z: newZ },
         });
       }
 
       return out;
-    })
+    }),
   }));
 };
 
@@ -145,28 +148,27 @@ export const dataSynthesize = (
     ...action,
     recordings: action.recordings.flatMap((recording) => {
       // always keep the original
-      const out: typeof recording[] = [recording];
+      const out: (typeof recording)[] = [recording];
       const { x, y, z } = recording.data;
-      const len = x.length;
       // helper to build one synthetic recording
       const makeSynthetic = (applyDither: boolean, applyDistort: boolean) => {
-        var localdistortion = gaussianRandom()*distortionFactor+1
-        const newX = x.map((v, i) => {
+        const localdistortion = gaussianRandom() * distortionFactor + 1;
+        const newX = x.map((v) => {
           let nv = v;
-          if (applyDither)   nv += gaussianRandom() * noiseFactor;
-          if (applyDistort)  nv *= localdistortion;
+          if (applyDither) nv += gaussianRandom() * noiseFactor;
+          if (applyDistort) nv *= localdistortion;
           return nv;
         });
-        const newY = y.map((v, i) => {
+        const newY = y.map((v) => {
           let nv = v;
-          if (applyDither)   nv += gaussianRandom() * noiseFactor;
-          if (applyDistort)  nv *= localdistortion;
+          if (applyDither) nv += gaussianRandom() * noiseFactor;
+          if (applyDistort) nv *= localdistortion;
           return nv;
         });
-        const newZ = z.map((v, i) => {
+        const newZ = z.map((v) => {
           let nv = v;
-          if (applyDither)   nv += gaussianRandom() * noiseFactor;
-          if (applyDistort)  nv *= localdistortion;
+          if (applyDither) nv += gaussianRandom() * noiseFactor;
+          if (applyDistort) nv *= localdistortion;
           return nv;
         });
 
@@ -202,16 +204,14 @@ export const prepareFeaturesAndLabels = (
   actions: ActionData[],
   dataWindow: DataWindow,
   modelOptions: ModelOptions,
-  synthesize:boolean=false,
-  rotate:boolean=false
+  synthesize: boolean = false,
+  rotate: boolean = false
 ): { features: number[][]; labels: number[][] } => {
   const features: number[][] = [];
   const labels: number[][] = [];
   const numActions = actions.length;
-  if(synthesize)
-    actions=dataSynthesize(actions,true,true,4,4);
-  if(rotate)
-    actions=dataRotate(actions)
+  if (synthesize) actions = dataSynthesize(actions, true, true, 4, 4);
+  if (rotate) actions = dataRotate(actions);
   actions.forEach((action, index) => {
     action.recordings.forEach((recording) => {
       // Prepare features

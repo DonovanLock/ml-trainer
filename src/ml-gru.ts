@@ -58,7 +58,9 @@ export const trainModel = async (
           const loss = logs?.loss?.toFixed(4);
           const acc = (logs?.acc ?? logs?.accuracy)?.toFixed(4);
           console.log(
-            `Epoch ${epoch + 1}/${modelOptions.epochs} — loss=${loss}, accuracy=${acc}`
+            `Epoch ${epoch + 1}/${
+              modelOptions.epochs
+            } — loss=${loss}, accuracy=${acc}`
           );
           if (onProgress) {
             onProgress(epoch / (modelOptions.epochs - 1));

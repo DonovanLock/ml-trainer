@@ -90,7 +90,7 @@ export const enum ModelTypes {
   GRU = "GRU",
   LOGREG = "LOGREG",
   DEFAULT = "DEFAULT",
-};
+}
 
 export interface ModelOptions {
   epochs: number;
@@ -377,6 +377,7 @@ export interface Actions {
   setLearningRate(value: number): void;
   setNeuronNumber(value: number): void;
   setTestNumber(value: number): void;
+  toggleFeaturesActive(values: Set<Filter>): void;
   toggleAdvancedOptionsEnabled(): void;
   setFeaturesActive(values: Set<Filter>): void;
   resetModelOptions(): void;
@@ -824,6 +825,22 @@ const createMlStore = (logging: Logging) => {
             return set(({ modelOptions }) => {
               const newModelOptions = modelOptions;
               newModelOptions.testNumber = value;
+              return { modelOptions: newModelOptions };
+            });
+          },
+
+          toggleFeaturesActive(values: Set<Filter>) {
+            if (values.size > 0) {
+              const { modelClear } = get();
+              modelClear();
+            }
+            return set(({ modelOptions }) => {
+              const newModelOptions = modelOptions;
+              values.forEach((f) =>
+                modelOptions.featuresActive.has(f)
+                  ? newModelOptions.featuresActive.delete(f)
+                  : newModelOptions.featuresActive.add(f)
+              );
               return { modelOptions: newModelOptions };
             });
           },
