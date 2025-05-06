@@ -8,7 +8,7 @@ import * as tf from "@tensorflow/tfjs";
 import { SymbolicTensor } from "@tensorflow/tfjs";
 import { getMlFilters, mlSettings } from "./mlConfig";
 import { ActionData, XYZData } from "./model";
-import { DataWindow, ModelOptions } from "./store";
+import { DataWindow, ModelOptions, ModelTypes } from "./store";
 
 export type TrainingResult =
   | { error: false; model: tf.LayersModel }
@@ -240,15 +240,25 @@ const createModel = (
 
   const input = tf.input({ shape: inputShape });
   const normalizer = tf.layers.batchNormalization().apply(input);
-  const dense = tf.layers
-    .dense({ units: modelOptions.neuronNumber, activation: "relu" })
-    .apply(normalizer);
-  const dropout = tf.layers
-    .dropout({ rate: modelOptions.dropoutRate })
-    .apply(dense) as SymbolicTensor;
-  const softmax = tf.layers
-    .dense({ units: numberOfClasses, activation: "softmax" })
-    .apply(dropout) as SymbolicTensor;
+
+  let softmax: tf.SymbolicTensor;
+
+  if (modelOptions.modelType == ModelTypes.LOGREG) {
+    softmax = tf.layers
+      .dense({ units: numberOfClasses, activation: "softmax" })
+      .apply(normalizer) as SymbolicTensor;
+  } else {
+    const dense = tf.layers
+      .dense({ units: modelOptions.neuronNumber, activation: "relu" })
+      .apply(normalizer);
+    const dropout = tf.layers
+      .dropout({ rate: modelOptions.dropoutRate })
+      .apply(dense) as SymbolicTensor;
+    softmax = tf.layers
+      .dense({ units: numberOfClasses, activation: "softmax" })
+      .apply(dropout) as SymbolicTensor;
+  }
+
   const model = tf.model({ inputs: input, outputs: softmax });
 
   model.compile({

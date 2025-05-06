@@ -19,7 +19,13 @@ import {
 import actionDataBadLabels from "./test-fixtures/shake-still-circle-legacy-bad-labels.json";
 import actionData from "./test-fixtures/shake-still-circle-data-samples-legacy.json";
 import testData from "./test-fixtures/shake-still-circle-legacy-test-data.json";
-import { currentDataWindow, defaultModelOptions } from "./store";
+import {
+  currentDataWindow,
+  defaultModelOptions,
+  logRegModelOptions,
+  ModelTypes,
+  ModelOptions,
+} from "./store";
 
 const fixUpTestData = (data: Partial<ActionData>[]): ActionData[] => {
   data.forEach((action) => (action.icon = "Heart"));
@@ -27,28 +33,46 @@ const fixUpTestData = (data: Partial<ActionData>[]): ActionData[] => {
 };
 
 let trainingResult: TrainingResult;
+let logRegTrainingResult: TrainingResult;
 beforeAll(async () => {
   // No webgl in tests running in node.
   await tf.setBackend("cpu");
+  const fixedUpActionData = fixUpTestData(actionData);
   trainingResult = await trainModel(
-    fixUpTestData(actionData),
+    fixedUpActionData,
     currentDataWindow,
     defaultModelOptions
   );
-}, 100000);
+  logRegTrainingResult = await trainModel(
+    fixedUpActionData,
+    currentDataWindow,
+    logRegModelOptions
+  );
+}, 1000000);
 
-const getModelResults = (data: ActionData[]) => {
+const getModelResults = (data: ActionData[], type: ModelTypes) => {
+  let options: ModelOptions;
+  let res: TrainingResult;
+
+  if (type == ModelTypes.LOGREG) {
+    options = logRegModelOptions;
+    res = logRegTrainingResult;
+  } else {
+    options = defaultModelOptions;
+    res = trainingResult;
+  }
+
   const { features, labels } = prepareFeaturesAndLabels(
     data,
     currentDataWindow,
-    defaultModelOptions
+    options
   );
 
-  if (trainingResult.error) {
+  if (res.error) {
     throw Error("No model returned");
   }
 
-  const tensorFlowResult = trainingResult.model.evaluate(
+  const tensorFlowResult = res.model.evaluate(
     tf.tensor(features),
     tf.tensor(labels)
   );
@@ -56,7 +80,7 @@ const getModelResults = (data: ActionData[]) => {
     .dataSync()[0]
     .toFixed(4);
   const tensorflowPredictionResult = (
-    trainingResult.model.predict(tf.tensor(features)) as tf.Tensor
+    res.model.predict(tf.tensor(features)) as tf.Tensor
   ).dataSync();
   return {
     tensorFlowResultAccuracy,
@@ -67,39 +91,54 @@ const getModelResults = (data: ActionData[]) => {
 
 describe("Model tests", () => {
   test("returns acceptable results on training data", () => {
-    const { tensorFlowResultAccuracy, tensorflowPredictionResult, labels } =
-      getModelResults(fixUpTestData(actionData));
-    const d = labels[0].length; // dimensions
-    for (let i = 0, j = 0; i < tensorflowPredictionResult.length; i += d, j++) {
-      const result = tensorflowPredictionResult.slice(i, i + d);
-      expect(result.indexOf(Math.max(...result))).toBe(
-        labels[j].indexOf(Math.max(...labels[j]))
-      );
-    }
-    expect(tensorFlowResultAccuracy).toBe("1.0000");
+    [ModelTypes.DEFAULT, ModelTypes.LOGREG].forEach((t) => {
+      const { tensorFlowResultAccuracy, tensorflowPredictionResult, labels } =
+        getModelResults(fixUpTestData(actionData), t);
+      const d = labels[0].length; // dimensions
+      for (
+        let i = 0, j = 0;
+        i < tensorflowPredictionResult.length;
+        i += d, j++
+      ) {
+        const result = tensorflowPredictionResult.slice(i, i + d);
+        expect(result.indexOf(Math.max(...result))).toBe(
+          labels[j].indexOf(Math.max(...labels[j]))
+        );
+      }
+      expect(tensorFlowResultAccuracy).toBe("1.0000");
+    });
   });
 
   // The action names don't matter, the order of the actions in the data.json file does.
   // Training data is shake, still, circle. This data is still, circle, shake.
   test("returns incorrect results on wrongly labelled training data", () => {
-    const { tensorFlowResultAccuracy, tensorflowPredictionResult, labels } =
-      getModelResults(fixUpTestData(actionDataBadLabels));
-    const d = labels[0].length; // dimensions
-    for (let i = 0, j = 0; i < tensorflowPredictionResult.length; i += d, j++) {
-      const result = tensorflowPredictionResult.slice(i, i + d);
-      expect(result.indexOf(Math.max(...result))).not.toBe(
-        labels[j].indexOf(Math.max(...labels[j]))
-      );
-    }
-    expect(tensorFlowResultAccuracy).toBe("0.0000");
+    [ModelTypes.DEFAULT, ModelTypes.LOGREG].forEach((t) => {
+      const { tensorFlowResultAccuracy, tensorflowPredictionResult, labels } =
+        getModelResults(fixUpTestData(actionDataBadLabels), t);
+      const d = labels[0].length; // dimensions
+      for (
+        let i = 0, j = 0;
+        i < tensorflowPredictionResult.length;
+        i += d, j++
+      ) {
+        const result = tensorflowPredictionResult.slice(i, i + d);
+        expect(result.indexOf(Math.max(...result))).not.toBe(
+          labels[j].indexOf(Math.max(...labels[j]))
+        );
+      }
+      expect(tensorFlowResultAccuracy).toBe("0.0000");
+    });
   });
 
   test("returns correct results on testing data", () => {
-    const { tensorFlowResultAccuracy } = getModelResults(
-      fixUpTestData(testData)
-    );
-    // The model thinks 1-2 samples of still are circle.
-    expect(parseFloat(tensorFlowResultAccuracy)).toBeGreaterThan(0.85);
+    [ModelTypes.DEFAULT, ModelTypes.LOGREG].forEach((t) => {
+      const { tensorFlowResultAccuracy } = getModelResults(
+        fixUpTestData(testData),
+        t
+      );
+      // The model thinks 1-2 samples of still are circle.
+      expect(parseFloat(tensorFlowResultAccuracy)).toBeGreaterThan(0.85);
+    });
   });
 });
 

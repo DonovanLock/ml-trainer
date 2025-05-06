@@ -40,6 +40,7 @@ import { ConfirmDialog } from "./ConfirmDialog";
 import { actionNameInputId } from "./ActionNameCard";
 import { recordButtonId } from "./ActionDataSamplesCard";
 import { keyboardShortcuts, useShortcut } from "../keyboard-shortcut-hooks";
+import ToggleModelButton from "./ToggleModelButton";
 
 const gridCommonProps: Partial<GridProps> = {
   gridTemplateColumns: "290px 1fr",
@@ -59,6 +60,7 @@ const headings: GridColumnHeadingItemProps[] = [
     itemsRight: (
       <HStack>
         <ShowGraphsCheckbox />
+        <ToggleModelButton />
         <DataSamplesMenu />
       </HStack>
     ),

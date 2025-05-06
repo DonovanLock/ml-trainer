@@ -9,7 +9,7 @@ const ResetModelOptionsButton = () => {
     <VStack>
       {advancedOptionsEnabled ? (
         <Button onClick={resetModelOptions} variant="primary">
-          Reset Sliders
+          Reset Options
         </Button>
       ) : (
         <></>

@@ -148,6 +148,20 @@ export const gruModelOptions: ModelOptions = {
   featuresActive: mlSettings.includedFilters,
   modelType: ModelTypes.GRU,
 };
+export const logRegModelOptions: ModelOptions = {
+  epochs: 200,
+  batchSize: 128,
+  learningRate: 0.4,
+  neuronNumber: 0,
+  testNumber: 0,
+  dropoutRate: 0.1,
+  recurrentDropout: 0.1,
+  filterSize: 0,
+  poolSize: 0,
+  kernelSize: 0,
+  featuresActive: mlSettings.includedFilters,
+  modelType: ModelTypes.LOGREG,
+};
 interface PredictionResult {
   confidences: Confidences;
   detected: Action | undefined;
@@ -372,6 +386,7 @@ export interface Actions {
   setActionIcon(id: ActionData["ID"], icon: MakeCodeIcon): void;
   setRequiredConfidence(id: ActionData["ID"], value: number): void;
   setTestsPassed(values: number[]): void;
+  setModelOptions(modelOptions: ModelOptions): void;
   setBatchSize(value: number): void;
   setEpochs(value: number): void;
   setLearningRate(value: number): void;
@@ -381,6 +396,7 @@ export interface Actions {
   toggleAdvancedOptionsEnabled(): void;
   setFeaturesActive(values: Set<Filter>): void;
   resetModelOptions(): void;
+  toggleModel(): void;
   deleteActionRecording(id: ActionData["ID"], recordingIdx: number): void;
   deleteAllActions(): void;
   downloadDataset(): void;
@@ -779,6 +795,14 @@ const createMlStore = (logging: Logging) => {
             );
           },
 
+          setModelOptions(newModelOptions: ModelOptions) {
+            const { modelClear } = get();
+            modelClear();
+            return set((s) => {
+              return { ...s, modelOptions: newModelOptions };
+            });
+          },
+
           setBatchSize(value: number) {
             const { modelClear } = get();
             modelClear();
@@ -868,18 +892,20 @@ const createMlStore = (logging: Logging) => {
           },
 
           resetModelOptions() {
-            const {
-              setBatchSize,
-              setEpochs,
-              setLearningRate,
-              setNeuronNumber,
-              setTestNumber,
-            } = get();
-            setBatchSize(16);
-            setEpochs(160);
-            setLearningRate(0.1);
-            setNeuronNumber(16);
-            setTestNumber(0);
+            const { setModelOptions } = get();
+            setModelOptions(defaultModelOptions);
+          },
+
+          toggleModel() {
+            const { modelClear } = get();
+            modelClear();
+            set(({ modelOptions }) => {
+              if (modelOptions.modelType == ModelTypes.DEFAULT) {
+                return { modelOptions: logRegModelOptions };
+              } else {
+                return { modelOptions: defaultModelOptions };
+              }
+            });
           },
 
           deleteActionRecording(id: ActionData["ID"], recordingIdx: number) {
