@@ -29,9 +29,15 @@ import LiveGraphPanel from "../components/LiveGraphPanel";
 import TrainModelDialogs from "../components/TrainModelFlowDialogs";
 import { useConnectionStage } from "../connection-stage-hooks";
 import { keyboardShortcuts, useShortcut } from "../keyboard-shortcut-hooks";
-import { useHasSufficientDataForTraining, useStore } from "../store";
+import {
+  useHasSufficientDataForTraining,
+  useStore,
+  useHasFeatureActive,
+  ModelTypes,
+} from "../store";
 import { tourElClassname } from "../tours";
 import { createTestingModelPageUrl } from "../urls";
+import ResetModelOptionsButton from "../components/ResetModelOptionsButton.tsx";
 
 const DataSamplesPage = () => {
   const actions = useStore((s) => s.actions);
@@ -42,41 +48,29 @@ const DataSamplesPage = () => {
   const setEpochs = useStore((s) => s.setEpochs);
   const setLearningRate = useStore((s) => s.setLearningRate);
   const setNeuronNumb = useStore((s) => s.setNeuronNumber);
-  const setTestNum = useStore((s) => s.setTestNumber);
+  const setTestNumber = useStore((s) => s.setTestNumber);
   const model = useStore((s) => s.model);
   const [selectedActionIdx, setSelectedActionIdx] = useState<number>(0);
-  const resetModelOptions = useStore((s) => s.resetModelOptions);
-  const handleReset = () => {
-    resetModelOptions();
-    if (batch !== 16) {
-      setBatchValue(16);
-    }
-    if (testNumber !== 0) {
-      setTestNumber(0);
-    }
-    if (epochNum !== 160) {
-      setEpochValue(160);
-    }
-    if (neuronNumber !== 16) {
-      setNeuronNumber(16);
-    }
-    if (rateNumber !== 0.1) {
-      setRateNumber(0.1);
-    }
-  };
 
   const navigate = useNavigate();
   const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
 
+  const upDateModelOptions = () => {
+    setBatchSize(batch);
+    setEpochs(epochNum === 1 ? epochNum : epochNum - 1);
+    setLearningRate(rateNumber);
+    setNeuronNumb(neuronNumber);
+  };
+
   const [batch, setBatchValue] = useState(modelOptions.batchSize);
-  const [epochNum, setEpochValue] = useState(modelOptions.epochs + 1);
-  const [neuronNumber, setNeuronNumber] = useState(modelOptions.neuronNumber);
-  const [rateNumber, setRateNumber] = useState(modelOptions.learningRate);
-  const [testNumber, setTestNumber] = useState(modelOptions.testNumber);
   const [showBatchTooltip, setShowBatchTooltip] = useState(false);
+  const [epochNum, setEpochValue] = useState(modelOptions.epochs + 1);
   const [showEpochTooltip, setShowEpochTooltip] = useState(false);
+  const [neuronNumber, setNeuronNumber] = useState(modelOptions.neuronNumber);
   const [showNeuronTooltip, setShowNeuronTooltip] = useState(false);
+  const [rateNumber, setRateNumber] = useState(modelOptions.learningRate);
   const [showRateTooltip, setShowRateTooltip] = useState(false);
+  const [testNumber, setTestNum] = useState(modelOptions.testNumber);
   const [showTestTooltip, setShowTestTooltip] = useState(false);
 
   const tourStart = useStore((s) => s.tourStart);
@@ -91,6 +85,7 @@ const DataSamplesPage = () => {
   const hasSufficientData = useHasSufficientDataForTraining(
     modelOptions.testNumber
   );
+  const hasFeatureActive = useHasFeatureActive();
   const isAddNewActionDisabled = actions.some((a) => a.name.length === 0);
 
   const maxTestSize = useMemo(() => {
@@ -161,19 +156,10 @@ const DataSamplesPage = () => {
                 <FormattedMessage id="add-action-action" />
               </Button>
             </HStack>
-            <HStack
-              gap={6}
-              marginLeft="auto"
-              overflowX="auto"
-              whiteSpace="nowrap"
-            >
-              {advancedOptionsEnabled && (
-                <>
-                  <VStack>
-                    <Button onClick={handleReset} variant="secondary">
-                      Reset Sliders
-                    </Button>
-                  </VStack>
+            <HStack gap={6}>
+              <ResetModelOptionsButton />
+              <VStack>
+                {advancedOptionsEnabled ? (
                   <VStack>
                     <Text>Batch Size</Text>
                     <Slider
@@ -181,7 +167,7 @@ const DataSamplesPage = () => {
                       value={modelOptions.batchSize}
                       width="125px"
                       min={1}
-                      max={100}
+                      max={150}
                       size="md"
                       colorScheme="blue"
                       onMouseEnter={() => setShowBatchTooltip(true)}
@@ -206,6 +192,12 @@ const DataSamplesPage = () => {
                       </Tooltip>
                     </Slider>
                   </VStack>
+                ) : (
+                  <></>
+                )}
+              </VStack>
+              <VStack>
+                {advancedOptionsEnabled ? (
                   <VStack>
                     <Text textStyle="sm">Epoch Number</Text>
                     <Slider
@@ -220,9 +212,7 @@ const DataSamplesPage = () => {
                       onMouseEnter={() => setShowEpochTooltip(true)}
                       onMouseLeave={() => setShowEpochTooltip(false)}
                       onChange={(val) => {
-                        setEpochValue(
-                          Number(val) === 1 ? Number(val) : Number(val) - 1
-                        );
+                        setEpochValue(Number(val));
                         setEpochs(Number(val));
                       }}
                     >
@@ -241,13 +231,19 @@ const DataSamplesPage = () => {
                       </Tooltip>
                     </Slider>
                   </VStack>
+                ) : (
+                  <></>
+                )}
+              </VStack>
+              <VStack>
+                {advancedOptionsEnabled ? (
                   <VStack>
                     <Text textStyle="sm">Learning Rate</Text>
                     <Slider
                       id="RateSlider"
                       value={modelOptions.learningRate}
                       width="125px"
-                      min={0.1}
+                      min={0.01}
                       max={1}
                       size="md"
                       step={0.05}
@@ -274,6 +270,13 @@ const DataSamplesPage = () => {
                       </Tooltip>
                     </Slider>
                   </VStack>
+                ) : (
+                  <></>
+                )}
+              </VStack>
+              <VStack>
+                {advancedOptionsEnabled &&
+                modelOptions.modelType != ModelTypes.LOGREG ? (
                   <VStack>
                     <Text textStyle="sm">Neuron Number</Text>
                     <Slider
@@ -306,6 +309,12 @@ const DataSamplesPage = () => {
                       </Tooltip>
                     </Slider>
                   </VStack>
+                ) : (
+                  <></>
+                )}
+              </VStack>
+              <VStack>
+                {advancedOptionsEnabled ? (
                   <VStack>
                     <Text textStyle="sm">No. Testing Samples</Text>
                     <Slider
@@ -332,14 +341,16 @@ const DataSamplesPage = () => {
                         color="white"
                         placement="top"
                         isOpen={showTestTooltip}
-                        label={modelOptions.testNumber}
+                        label={testNumber}
                       >
                         <SliderThumb />
                       </Tooltip>
                     </Slider>
                   </VStack>
-                </>
-              )}
+                ) : (
+                  <></>
+                )}
+              </VStack>
               {model ? (
                 <HStack>
                   <Button
@@ -358,11 +369,12 @@ const DataSamplesPage = () => {
                     ref={trainButtonRef}
                     className={tourElClassname.trainModelButton}
                     onClick={() => {
+                      upDateModelOptions();
                       void trainModelFlowStart(handleNavigateToModel);
                     }}
                     width="175px"
                     variant={
-                      hasSufficientData && modelOptions.featuresActive.size > 0
+                      hasSufficientData && hasFeatureActive
                         ? "primary"
                         : "secondary-disabled"
                     }

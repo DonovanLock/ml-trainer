@@ -4,7 +4,7 @@ import * as tf from "@tensorflow/tfjs";
 import * as fs from "fs";
 import { prepareFeaturesAndLabels, trainModel } from "./ml";
 import { ActionData } from "./model";
-import { currentDataWindow, defaultModelOptions, ModelOptions } from "./store";
+import { currentDataWindow, ModelOptions, ModelTypes } from "./store";
 import { mlSettings } from "./mlConfig";
 import trainingData from "./test-fixtures/comparison-data/training-data.json";
 import bestTestData from "./test-fixtures/comparison-data/test-data-best.json";
@@ -81,29 +81,46 @@ const searchGrid = async () => {
   const results: { [key: string]: number } = {};
 
   const epochOptions = [80, 120, 160, 200];
-  const batchSizes = [2, 4, 8, 16, 32];
-  const learningRates = [defaultModelOptions.learningRate]; // Could use something like [0.01, 0.05, 0.1]
-  const neuronCounts = [defaultModelOptions.neuronNumber]; // Could use something like [8, 16, 32]
-
+  const batchSizes = [32];
+  const learningRates = [0.1, 0.2, 0.4];
+  const neuronCounts = [16, 32, 64];
+  const dropoutRates = [0, 0.1, 0.2];
+  const filterSizes = [32];
+  const kernelSizes = [3];
+  const poolSizes = [2];
   let i = 0;
 
   for (const epochs of epochOptions) {
     for (const batchSize of batchSizes) {
       for (const learningRate of learningRates) {
         for (const neuronNumber of neuronCounts) {
-          const config: ModelOptions = {
-            epochs,
-            batchSize,
-            learningRate,
-            neuronNumber,
-            testNumber: 0,
-            featuresActive: mlSettings.includedFilters,
-          };
+          for (const dropoutRate of dropoutRates) {
+            for (const filterSize of filterSizes) {
+              for (const kernelSize of kernelSizes) {
+                for (const poolSize of poolSizes) {
+                  const config: ModelOptions = {
+                    epochs,
+                    batchSize,
+                    learningRate,
+                    neuronNumber,
+                    testNumber: 0,
+                    dropoutRate,
+                    recurrentDropout: 0,
+                    filterSize,
+                    kernelSize,
+                    poolSize,
+                    featuresActive: mlSettings.includedFilters,
+                    modelType: ModelTypes.DEFAULT,
+                  };
 
-          const key = `epochs=${epochs},batchSize=${batchSize},lr=${learningRate},neurons=${neuronNumber}`;
-          console.log(`[${++i}] Testing ${key}`);
-          const avgAccuracy = await getAverageAccuracy(config);
-          results[key] = avgAccuracy;
+                  const key = `epochs=${epochs},batchSize=${batchSize},lr=${learningRate},neurons=${neuronNumber},dropout=${dropoutRate}`;
+                  console.log(`[${++i}] Testing ${key}`);
+                  const avgAccuracy = await getAverageAccuracy(config);
+                  results[key] = avgAccuracy;
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -143,8 +160,8 @@ afterAll(() => {
 
   fs.writeFile("tuningResults.txt", lines.join("\n"), (err) => {
     if (err) {
-      return console.error("Error writing to tuningResults.txt: ", err);
+      return console.error("Error writing to comparisonLog.txt: ", err);
     }
-    console.log("Details written to tuningResults.txt.");
+    console.log("Details written to comparisonLog.txt.");
   });
 });
