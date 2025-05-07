@@ -143,8 +143,8 @@ afterAll(() => {
 
   fs.writeFile("tuningResults.txt", lines.join("\n"), (err) => {
     if (err) {
-      return console.error("Error writing to comparisonLog.txt: ", err);
+      return console.error("Error writing to tuningResults.txt: ", err);
     }
-    console.log("Details written to comparisonLog.txt.");
+    console.log("Details written to tuningResults.txt.");
   });
 });
