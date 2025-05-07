@@ -37,7 +37,7 @@ import {
 } from "../store";
 import { tourElClassname } from "../tours";
 import { createTestingModelPageUrl } from "../urls";
-import ResetModelOptionsButton from "../components/ResetModelOptionsButton";
+import ResetModelOptionsButton from "../components/ResetModelOptionsButton.tsx";
 
 const DataSamplesPage = () => {
   const actions = useStore((s) => s.actions);

@@ -43,7 +43,7 @@ import { keyboardShortcuts, useShortcut } from "../keyboard-shortcut-hooks";
 import ToggleModelButton from "./ToggleModelButton";
 
 const gridCommonProps: Partial<GridProps> = {
-  gridTemplateColumns: "290px 1fr",
+  gridTemplateColumns: { base: "150px 1fr", md: "290px 1fr" },
   gap: 3,
   px: 5,
   w: "100%",

@@ -33,6 +33,7 @@ import ViewDataFeaturesMenuItem from "./ViewDataFeaturesMenuItem";
 import { useProjectIsUntitled } from "../hooks/project-hooks";
 import FilterFeaturesDialogBox from "./FilterFeaturesDialogBox";
 import EnableAdvancedModelOptionsMenuItem from "./EnableAdvancedModelOptionsMenuItem";
+import ShowGraphsMenuItem from "./ShowGraphsMenuItem";
 
 const DataSamplesMenu = () => {
   const intl = useIntl();
@@ -142,6 +143,7 @@ const DataSamplesMenu = () => {
               <FormattedMessage id="delete-data-samples-action" />
             </MenuItem>
             <MenuDivider />
+            <ShowGraphsMenuItem />
             <ViewDataFeaturesMenuItem />
             <EnableAdvancedModelOptionsMenuItem />
             <MenuItem

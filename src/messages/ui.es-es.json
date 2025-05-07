@@ -1345,6 +1345,12 @@
       "value": "Ayudar a traducir"
     }
   ],
+  "hide-graphs-action": [
+    {
+      "type": 0,
+      "value": "Hide graphs"
+    }
+  ],
   "home-action": [
     {
       "type": 0,
@@ -2531,6 +2537,12 @@
     {
       "type": 0,
       "value": "Menú de acciones de configuración"
+    }
+  ],
+  "show-graphs-action": [
+    {
+      "type": 0,
+      "value": "Show graphs"
     }
   ],
   "show-graphs-checkbox-label-text": [

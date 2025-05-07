@@ -20,7 +20,7 @@ const InfoToolTip = ({ titleId, descriptionId, ...rest }: InfoToolTipProps) => {
       isFocusable
       titleId={titleId}
       hasArrow
-      placement="right"
+      placement="bottom"
       {...rest}
       label={
         <VStack textAlign="left" alignContent="left" alignItems="left" m={3}>

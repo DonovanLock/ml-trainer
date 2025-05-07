@@ -1,10 +1,10 @@
-This log file was generated at 04:20:35, 18/04/2025, with 10 runs.
+This log file was generated at 18:19:05, 07/05/2025, with 10 runs.
 
 MACHINE LEARNING METRICS:
-                   Dataset: Worst     Poor      OK        Good      Best      
-          Average Accuracy: 0.79001   0.88335   0.96001   0.99333   1         
-        Average Confidence: 0.73073   0.85392   0.92379   0.97318   0.98685   
-Average Correct Confidence: 0.87988   0.942     0.95249   0.97714   0.98685   
+                Dataset: Worst     Poor      OK        Good      Best      
+          Mean Accuracy: 0.82      0.90001   0.98001   1         1         
+        Mean Confidence: 0.74045   0.86561   0.93342   0.98247   0.98602   
+Mean Correct Confidence: 0.86692   0.94348   0.94674   0.98247   0.98602   
 
 DEFINITIONS:
 Accuracy is simply the proportion of classifications which are correct. It is directly

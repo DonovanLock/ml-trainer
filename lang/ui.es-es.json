@@ -795,6 +795,10 @@
     "defaultMessage": "Ayudar a traducir",
     "description": "Help translate  menu option text"
   },
+  "hide-graphs-action": {
+    "defaultMessage": "Hide graphs",
+    "description": "Hide graphs menu item text"
+  },
   "home-action": {
     "defaultMessage": "Inicio",
     "description": "Home button text"
@@ -1434,6 +1438,10 @@
   "settings-menu-action": {
     "defaultMessage": "Menú de acciones de configuración",
     "description": "Label for settings actions menu button"
+  },
+  "show-graphs-action": {
+    "defaultMessage": "Show graphs",
+    "description": "Show graphs menu item text"
   },
   "show-graphs-checkbox-label-text": {
     "defaultMessage": "Mostrar gráficos",

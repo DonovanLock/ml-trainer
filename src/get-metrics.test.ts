@@ -108,14 +108,6 @@ const getMetrics = (trainedModel: TrainingResult) => {
   return [accuracy, meanConfidence, meanCorrectConfidence];
 };
 
-/*for (let i = 0; i < runs; i++) {
-  test("", () => getMetrics(0));
-  test("", () => getMetrics(1));
-  test("", () => getMetrics(2));
-  test("", () => getMetrics(3));
-  test("", () => getMetrics(4));
-}*/
-
 let overallAccuracy = [0, 0, 0, 0, 0];
 let overallMeanConfidence = [0, 0, 0, 0, 0];
 let overallMeanCorrectConfidence = [0, 0, 0, 0, 0];
@@ -161,18 +153,18 @@ afterAll(() => {
   );
   lines.push("MACHINE LEARNING METRICS:");
   lines.push(
-    "                   Dataset: Worst     Poor      OK        Good      Best      "
+    "                Dataset: Worst     Poor      OK        Good      Best      "
   );
   lines.push(
-    "          Average Accuracy: " +
+    "          Mean Accuracy: " +
       overallAccuracy.map((x) => x.toString().padEnd(10, " ")).join("")
   );
   lines.push(
-    "        Average Confidence: " +
+    "        Mean Confidence: " +
       overallMeanConfidence.map((x) => x.toString().padEnd(10, " ")).join("")
   );
   lines.push(
-    "Average Correct Confidence: " +
+    "Mean Correct Confidence: " +
       overallMeanCorrectConfidence
         .map((x) => x.toString().padEnd(10, " "))
         .join("")
@@ -207,8 +199,8 @@ afterAll(() => {
 
   fs.writeFile("metricResults.txt", lines.join("\n"), (err) => {
     if (err) {
-      return console.error("Error writing to comparisonLog.txt: ", err);
+      return console.error("Error writing to metricResults.txt: ", err);
     }
-    console.log("Details written to comparisonLog.txt.");
+    console.log("Details written to metricResults.txt.");
   });
 });
