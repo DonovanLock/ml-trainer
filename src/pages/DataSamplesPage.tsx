@@ -33,6 +33,7 @@ import {
   useHasSufficientDataForTraining,
   useStore,
   useHasFeatureActive,
+  ModelTypes,
 } from "../store";
 import { tourElClassname } from "../tours";
 import { createTestingModelPageUrl } from "../urls";
@@ -166,7 +167,7 @@ const DataSamplesPage = () => {
                       value={modelOptions.batchSize}
                       width="125px"
                       min={1}
-                      max={100}
+                      max={150}
                       size="md"
                       colorScheme="blue"
                       onMouseEnter={() => setShowBatchTooltip(true)}
@@ -242,7 +243,7 @@ const DataSamplesPage = () => {
                       id="RateSlider"
                       value={modelOptions.learningRate}
                       width="125px"
-                      min={0.1}
+                      min={0.01}
                       max={1}
                       size="md"
                       step={0.05}
@@ -274,7 +275,8 @@ const DataSamplesPage = () => {
                 )}
               </VStack>
               <VStack>
-                {advancedOptionsEnabled ? (
+                {advancedOptionsEnabled &&
+                modelOptions.modelType != ModelTypes.LOGREG ? (
                   <VStack>
                     <Text textStyle="sm">Neuron Number</Text>
                     <Slider

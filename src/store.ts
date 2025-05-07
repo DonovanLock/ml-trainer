@@ -162,6 +162,7 @@ export const logRegModelOptions: ModelOptions = {
   featuresActive: mlSettings.includedFilters,
   modelType: ModelTypes.LOGREG,
 };
+
 interface PredictionResult {
   confidences: Confidences;
   detected: Action | undefined;
@@ -502,7 +503,7 @@ const createMlStore = (logging: Logging) => {
           projectEdited: false,
           settings: defaultSettings,
           model: undefined,
-          modelOptions: defaultModelOptions,
+          modelOptions: { ...defaultModelOptions },
           advancedOptionsEnabled: false,
           isEditorOpen: false,
           isEditorReady: false,
@@ -799,7 +800,7 @@ const createMlStore = (logging: Logging) => {
             const { modelClear } = get();
             modelClear();
             return set((s) => {
-              return { ...s, modelOptions: newModelOptions };
+              return { ...s, modelOptions: { ...newModelOptions } };
             });
           },
 
@@ -884,9 +885,7 @@ const createMlStore = (logging: Logging) => {
             const { resetModelOptions } = get();
             return set(({ advancedOptionsEnabled }) => {
               const newAdvancedOptionsEnabled = !advancedOptionsEnabled;
-              if (!advancedOptionsEnabled) {
-                resetModelOptions();
-              }
+              resetModelOptions();
               return { advancedOptionsEnabled: newAdvancedOptionsEnabled };
             });
           },
@@ -901,9 +900,9 @@ const createMlStore = (logging: Logging) => {
             modelClear();
             set(({ modelOptions }) => {
               if (modelOptions.modelType == ModelTypes.DEFAULT) {
-                return { modelOptions: logRegModelOptions };
+                return { modelOptions: { ...logRegModelOptions } };
               } else {
-                return { modelOptions: defaultModelOptions };
+                return { modelOptions: { ...defaultModelOptions } };
               }
             });
           },
