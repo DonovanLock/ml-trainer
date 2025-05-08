@@ -29,7 +29,11 @@ import LiveGraphPanel from "../components/LiveGraphPanel";
 import TrainModelDialogs from "../components/TrainModelFlowDialogs";
 import { useConnectionStage } from "../connection-stage-hooks";
 import { keyboardShortcuts, useShortcut } from "../keyboard-shortcut-hooks";
-import { useHasSufficientDataForTraining, useStore } from "../store";
+import {
+  useHasSufficientDataForTraining,
+  useStore,
+  ModelTypes,
+} from "../store";
 import { tourElClassname } from "../tours";
 import { createTestingModelPageUrl } from "../urls";
 
@@ -46,7 +50,7 @@ const DataSamplesPage = () => {
   const model = useStore((s) => s.model);
   const [selectedActionIdx, setSelectedActionIdx] = useState<number>(0);
   const resetModelOptions = useStore((s) => s.resetModelOptions);
-  const handleReset = () => {
+  /*const handleReset = () => {
     resetModelOptions();
     if (batch !== 16) {
       setBatchValue(16);
@@ -63,16 +67,16 @@ const DataSamplesPage = () => {
     if (rateNumber !== 0.1) {
       setRateNumber(0.1);
     }
-  };
+  };*/
 
   const navigate = useNavigate();
   const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
 
-  const [batch, setBatchValue] = useState(modelOptions.batchSize);
-  const [epochNum, setEpochValue] = useState(modelOptions.epochs + 1);
-  const [neuronNumber, setNeuronNumber] = useState(modelOptions.neuronNumber);
-  const [rateNumber, setRateNumber] = useState(modelOptions.learningRate);
-  const [testNumber, setTestNumber] = useState(modelOptions.testNumber);
+  const setBatchValue = useState(modelOptions.batchSize)[1];
+  const setEpochValue = useState(modelOptions.epochs + 1)[1];
+  const setNeuronNumber = useState(modelOptions.neuronNumber)[1];
+  const setRateNumber = useState(modelOptions.learningRate)[1];
+  const setTestNumber = useState(modelOptions.testNumber)[1];
   const [showBatchTooltip, setShowBatchTooltip] = useState(false);
   const [showEpochTooltip, setShowEpochTooltip] = useState(false);
   const [showNeuronTooltip, setShowNeuronTooltip] = useState(false);
@@ -170,7 +174,7 @@ const DataSamplesPage = () => {
               {advancedOptionsEnabled && (
                 <>
                   <VStack>
-                    <Button onClick={handleReset} variant="secondary">
+                    <Button onClick={resetModelOptions} variant="secondary">
                       Reset Sliders
                     </Button>
                   </VStack>
@@ -181,7 +185,7 @@ const DataSamplesPage = () => {
                       value={modelOptions.batchSize}
                       width="125px"
                       min={1}
-                      max={100}
+                      max={150}
                       size="md"
                       colorScheme="blue"
                       onMouseEnter={() => setShowBatchTooltip(true)}
@@ -247,7 +251,7 @@ const DataSamplesPage = () => {
                       id="RateSlider"
                       value={modelOptions.learningRate}
                       width="125px"
-                      min={0.1}
+                      min={0.01}
                       max={1}
                       size="md"
                       step={0.05}
@@ -274,38 +278,42 @@ const DataSamplesPage = () => {
                       </Tooltip>
                     </Slider>
                   </VStack>
-                  <VStack>
-                    <Text textStyle="sm">Neuron Number</Text>
-                    <Slider
-                      id="NeuronSlider"
-                      value={modelOptions.neuronNumber}
-                      width="125px"
-                      min={1}
-                      max={100}
-                      size="md"
-                      colorScheme="blue"
-                      onMouseEnter={() => setShowNeuronTooltip(true)}
-                      onMouseLeave={() => setShowNeuronTooltip(false)}
-                      onChange={(val) => {
-                        setNeuronNumber(Number(val));
-                        setNeuronNumb(Number(val));
-                      }}
-                    >
-                      <SliderTrack>
-                        <SliderFilledTrack />
-                      </SliderTrack>
-                      <Tooltip
-                        hasArrow
-                        bg="blue.500"
-                        color="white"
-                        placement="top"
-                        isOpen={showNeuronTooltip}
-                        label={modelOptions.neuronNumber}
+                  {modelOptions.modelType != ModelTypes.LOGREG ? (
+                    <VStack>
+                      <Text textStyle="sm">Neuron Number</Text>
+                      <Slider
+                        id="NeuronSlider"
+                        value={modelOptions.neuronNumber}
+                        width="125px"
+                        min={1}
+                        max={100}
+                        size="md"
+                        colorScheme="blue"
+                        onMouseEnter={() => setShowNeuronTooltip(true)}
+                        onMouseLeave={() => setShowNeuronTooltip(false)}
+                        onChange={(val) => {
+                          setNeuronNumber(Number(val));
+                          setNeuronNumb(Number(val));
+                        }}
                       >
-                        <SliderThumb />
-                      </Tooltip>
-                    </Slider>
-                  </VStack>
+                        <SliderTrack>
+                          <SliderFilledTrack />
+                        </SliderTrack>
+                        <Tooltip
+                          hasArrow
+                          bg="blue.500"
+                          color="white"
+                          placement="top"
+                          isOpen={showNeuronTooltip}
+                          label={modelOptions.neuronNumber}
+                        >
+                          <SliderThumb />
+                        </Tooltip>
+                      </Slider>
+                    </VStack>
+                  ) : (
+                    <></>
+                  )}
                   <VStack>
                     <Text textStyle="sm">No. Testing Samples</Text>
                     <Slider
