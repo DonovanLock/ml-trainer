@@ -389,6 +389,7 @@ export interface Actions {
   setTestsPassed(values: number[]): void;
   setModelOptions(modelOptions: ModelOptions): void;
   setBatchSize(value: number): void;
+  setModelType(type: ModelTypes): void;
   setEpochs(value: number): void;
   setLearningRate(value: number): void;
   setNeuronNumber(value: number): void;
@@ -814,6 +815,16 @@ const createMlStore = (logging: Logging) => {
             });
           },
 
+          setModelType(type: ModelTypes) {
+            const { modelClear } = get();
+            modelClear();
+            return set(({ modelOptions }) => {
+              const newModelOptions = modelOptions;
+              newModelOptions.modelType = type;
+              return { modelOptions: newModelOptions };
+            });
+          },
+
           setEpochs(value: number) {
             const { modelClear } = get();
             modelClear();
@@ -882,17 +893,30 @@ const createMlStore = (logging: Logging) => {
           },
 
           toggleAdvancedOptionsEnabled() {
-            const { resetModelOptions } = get();
+            const { resetModelOptions, setModelType } = get();
             return set(({ advancedOptionsEnabled }) => {
               const newAdvancedOptionsEnabled = !advancedOptionsEnabled;
-              resetModelOptions();
+              if (!newAdvancedOptionsEnabled) {
+                setModelType(ModelTypes.DEFAULT);
+                resetModelOptions();
+              }
               return { advancedOptionsEnabled: newAdvancedOptionsEnabled };
             });
           },
 
           resetModelOptions() {
-            const { setModelOptions } = get();
-            setModelOptions(defaultModelOptions);
+            set(({ modelOptions }) => {
+              switch (modelOptions.modelType) {
+                case ModelTypes.CNN:
+                  return { modelOptions: { ...cnnModelOptions } };
+                case ModelTypes.GRU:
+                  return { modelOptions: { ...gruModelOptions } };
+                case ModelTypes.LOGREG:
+                  return { modelOptions: { ...logRegModelOptions } };
+                case ModelTypes.DEFAULT:
+                  return { modelOptions: { ...defaultModelOptions } };
+              }
+            });
           },
 
           toggleModel() {
