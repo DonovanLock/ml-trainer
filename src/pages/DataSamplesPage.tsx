@@ -51,6 +51,25 @@ const DataSamplesPage = () => {
   const setTestNumber = useStore((s) => s.setTestNumber);
   const model = useStore((s) => s.model);
   const [selectedActionIdx, setSelectedActionIdx] = useState<number>(0);
+  const resetModelOptions = useStore((s) => s.resetModelOptions);
+  const handleReset = () => {
+    resetModelOptions();
+    if (batch !== 16) {
+      setBatchValue(16);
+    }
+    if (testNumber !== 0) {
+      setTestNumber(0);
+    }
+    if (epochNum !== 160) {
+      setEpochValue(160);
+    }
+    if (neuronNumber !== 16) {
+      setNeuronNumber(16);
+    }
+    if (rateNumber !== 0.1) {
+      setRateNumber(0.1);
+    }
+  };
 
   const navigate = useNavigate();
   const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
@@ -156,10 +175,15 @@ const DataSamplesPage = () => {
                 <FormattedMessage id="add-action-action" />
               </Button>
             </HStack>
-            <HStack gap={6}>
-              <ResetModelOptionsButton />
-              <VStack>
-                {advancedOptionsEnabled ? (
+            <HStack
+              gap={6}
+              marginLeft="auto"
+              overflowX="auto"
+              whiteSpace="nowrap"
+            >
+              {advancedOptionsEnabled && (
+                <>
+                  <ResetModelOptionsButton />
                   <VStack>
                     <Text>Batch Size</Text>
                     <Slider
@@ -192,12 +216,6 @@ const DataSamplesPage = () => {
                       </Tooltip>
                     </Slider>
                   </VStack>
-                ) : (
-                  <></>
-                )}
-              </VStack>
-              <VStack>
-                {advancedOptionsEnabled ? (
                   <VStack>
                     <Text textStyle="sm">Epoch Number</Text>
                     <Slider
@@ -231,12 +249,6 @@ const DataSamplesPage = () => {
                       </Tooltip>
                     </Slider>
                   </VStack>
-                ) : (
-                  <></>
-                )}
-              </VStack>
-              <VStack>
-                {advancedOptionsEnabled ? (
                   <VStack>
                     <Text textStyle="sm">Learning Rate</Text>
                     <Slider
@@ -270,51 +282,40 @@ const DataSamplesPage = () => {
                       </Tooltip>
                     </Slider>
                   </VStack>
-                ) : (
-                  <></>
-                )}
-              </VStack>
-              <VStack>
-                {advancedOptionsEnabled &&
-                modelOptions.modelType != ModelTypes.LOGREG ? (
-                  <VStack>
-                    <Text textStyle="sm">Neuron Number</Text>
-                    <Slider
-                      id="NeuronSlider"
-                      value={modelOptions.neuronNumber}
-                      width="125px"
-                      min={1}
-                      max={100}
-                      size="md"
-                      colorScheme="blue"
-                      onMouseEnter={() => setShowNeuronTooltip(true)}
-                      onMouseLeave={() => setShowNeuronTooltip(false)}
-                      onChange={(val) => {
-                        setNeuronNumber(Number(val));
-                        setNeuronNumb(Number(val));
-                      }}
-                    >
-                      <SliderTrack>
-                        <SliderFilledTrack />
-                      </SliderTrack>
-                      <Tooltip
-                        hasArrow
-                        bg="blue.500"
-                        color="white"
-                        placement="top"
-                        isOpen={showNeuronTooltip}
-                        label={modelOptions.neuronNumber}
+                  {modelOptions.modelType !== ModelTypes.LOGREG &&
+                    <VStack>
+                      <Text textStyle="sm">Neuron Number</Text>
+                      <Slider
+                        id="NeuronSlider"
+                        value={modelOptions.neuronNumber}
+                        width="125px"
+                        min={1}
+                        max={100}
+                        size="md"
+                        colorScheme="blue"
+                        onMouseEnter={() => setShowNeuronTooltip(true)}
+                        onMouseLeave={() => setShowNeuronTooltip(false)}
+                        onChange={(val) => {
+                          setNeuronNumber(Number(val));
+                          setNeuronNumb(Number(val));
+                        }}
                       >
-                        <SliderThumb />
-                      </Tooltip>
-                    </Slider>
-                  </VStack>
-                ) : (
-                  <></>
-                )}
-              </VStack>
-              <VStack>
-                {advancedOptionsEnabled ? (
+                        <SliderTrack>
+                          <SliderFilledTrack />
+                        </SliderTrack>
+                        <Tooltip
+                          hasArrow
+                          bg="blue.500"
+                          color="white"
+                          placement="top"
+                          isOpen={showNeuronTooltip}
+                          label={modelOptions.neuronNumber}
+                        >
+                          <SliderThumb />
+                        </Tooltip>
+                      </Slider>
+                    </VStack>
+                  }
                   <VStack>
                     <Text textStyle="sm">No. Testing Samples</Text>
                     <Slider
@@ -347,10 +348,8 @@ const DataSamplesPage = () => {
                       </Tooltip>
                     </Slider>
                   </VStack>
-                ) : (
-                  <></>
-                )}
-              </VStack>
+                </>
+              )}
               {model ? (
                 <HStack>
                   <Button
