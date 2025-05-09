@@ -23,9 +23,7 @@ export const trainModel = async (
   const { features, labels } = prepareFeaturesAndLabels(
     data,
     dataWindow,
-    modelOptions,
-    true,
-    true
+    modelOptions
   );
   const model: tf.LayersModel = createModel(data, modelOptions);
 
@@ -203,15 +201,19 @@ export const dataSynthesize = (
 export const prepareFeaturesAndLabels = (
   actions: ActionData[],
   dataWindow: DataWindow,
-  modelOptions: ModelOptions,
-  synthesize: boolean = false,
-  rotate: boolean = false
+  modelOptions: ModelOptions
 ): { features: number[][]; labels: number[][] } => {
   const features: number[][] = [];
   const labels: number[][] = [];
   const numActions = actions.length;
-  if (synthesize) actions = dataSynthesize(actions, true, true, 4, 4);
-  if (rotate) actions = dataRotate(actions);
+  if (modelOptions.distortion || modelOptions.dithering) {
+    actions = dataSynthesize(
+      actions,
+      modelOptions.dithering,
+      modelOptions.distortion
+    );
+  }
+  if (modelOptions.rotation) actions = dataRotate(actions);
   actions.forEach((action, index) => {
     action.recordings.forEach((recording) => {
       // Prepare features

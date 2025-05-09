@@ -34,6 +34,7 @@ import { useProjectIsUntitled } from "../hooks/project-hooks";
 import FilterFeaturesDialogBox from "./FilterFeaturesDialogBox";
 import EnableAdvancedModelOptionsMenuItem from "./EnableAdvancedModelOptionsMenuItem";
 import ShowGraphsMenuItem from "./ShowGraphsMenuItem";
+import DataProcessingDialogBox from "./DataProcessingDialogBox";
 
 const DataSamplesMenu = () => {
   const intl = useIntl();
@@ -48,6 +49,9 @@ const DataSamplesMenu = () => {
   );
   const filterFeaturesDialogOnOpen = useStore(
     (s) => s.filterFeaturesDialogOnOpen
+  );
+  const dataProcessingDialogOnOpen = useStore(
+    (s) => s.dataProcessingDialogOnOpen
   );
   const closeDialog = useStore((s) => s.closeDialog);
   const isNameProjectDialogOpen = useStore((s) => s.isNameProjectDialogOpen);
@@ -114,6 +118,7 @@ const DataSamplesMenu = () => {
         onCancel={closeDialog}
       />
       <FilterFeaturesDialogBox />
+      <DataProcessingDialogBox />
       <Menu>
         <MenuButton
           as={IconButton}
@@ -151,6 +156,12 @@ const DataSamplesMenu = () => {
               icon={<RiArrowUpDownLine />}
             >
               <FormattedMessage id="filter-features-dialog-heading" />
+            </MenuItem>
+            <MenuItem
+              onClick={dataProcessingDialogOnOpen}
+              icon={<RiArrowUpDownLine />}
+            >
+              Data Processing Options
             </MenuItem>
           </MenuList>
         </Portal>

@@ -105,6 +105,9 @@ export interface ModelOptions {
   kernelSize: number;
   featuresActive: Set<Filter>;
   modelType: ModelTypes;
+  dithering: boolean;
+  distortion: boolean;
+  rotation: boolean;
 }
 export const cnnModelOptions: ModelOptions = {
   epochs: 80,
@@ -119,6 +122,9 @@ export const cnnModelOptions: ModelOptions = {
   kernelSize: 3,
   featuresActive: mlSettings.includedFilters,
   modelType: ModelTypes.CNN,
+  dithering: true,
+  distortion: true,
+  rotation: true,
 };
 export const defaultModelOptions: ModelOptions = {
   epochs: 200,
@@ -133,6 +139,9 @@ export const defaultModelOptions: ModelOptions = {
   kernelSize: 0,
   featuresActive: mlSettings.includedFilters,
   modelType: ModelTypes.DEFAULT,
+  dithering: true,
+  distortion: true,
+  rotation: true,
 };
 export const gruModelOptions: ModelOptions = {
   epochs: 100,
@@ -147,6 +156,9 @@ export const gruModelOptions: ModelOptions = {
   kernelSize: 0,
   featuresActive: mlSettings.includedFilters,
   modelType: ModelTypes.GRU,
+  dithering: true,
+  distortion: true,
+  rotation: true,
 };
 export const logRegModelOptions: ModelOptions = {
   epochs: 200,
@@ -161,6 +173,9 @@ export const logRegModelOptions: ModelOptions = {
   kernelSize: 0,
   featuresActive: mlSettings.includedFilters,
   modelType: ModelTypes.LOGREG,
+  dithering: true,
+  distortion: true,
+  rotation: true,
 };
 
 interface PredictionResult {
@@ -373,6 +388,7 @@ export interface State {
   isRecordingDialogOpen: boolean;
   isConnectToRecordDialogOpen: boolean;
   isFeaturesFilterDialogOpen: boolean;
+  isDataProcessingDialogOpen: boolean;
 }
 
 export interface ConnectOptions {
@@ -388,6 +404,11 @@ export interface Actions {
   setRequiredConfidence(id: ActionData["ID"], value: number): void;
   setTestsPassed(values: number[]): void;
   setModelOptions(modelOptions: ModelOptions): void;
+  setDitheringDistortionRotation(
+    dithering: boolean,
+    distortion: boolean,
+    rotation: boolean
+  ): void;
   setBatchSize(value: number): void;
   setModelType(type: ModelTypes): void;
   setEpochs(value: number): void;
@@ -476,6 +497,7 @@ export interface Actions {
   recordingDialogOnOpen(): void;
   connectToRecordDialogOnOpen(): void;
   filterFeaturesDialogOnOpen(): void;
+  dataProcessingDialogOnOpen(): void;
   closeDialog(): void;
   isNonConnectionDialogOpen(): boolean;
 }
@@ -537,6 +559,7 @@ const createMlStore = (logging: Logging) => {
           isDeleteActionDialogOpen: false,
           isIncompatibleEditorDeviceDialogOpen: false,
           isFeaturesFilterDialogOpen: false,
+          isDataProcessingDialogOpen: false,
 
           setSettings(update: Partial<Settings>) {
             set(
@@ -800,8 +823,32 @@ const createMlStore = (logging: Logging) => {
           setModelOptions(newModelOptions: ModelOptions) {
             const { modelClear } = get();
             modelClear();
-            return set((s) => {
-              return { ...s, modelOptions: { ...newModelOptions } };
+            return set(({ modelOptions }) => {
+              const setModelOptions = {
+                ...newModelOptions,
+                dithering: modelOptions.dithering,
+                distortion: modelOptions.distortion,
+                rotation: modelOptions.rotation,
+              };
+              return { modelOptions: setModelOptions };
+            });
+          },
+
+          setDitheringDistortionRotation(
+            dith: boolean,
+            dist: boolean,
+            rot: boolean
+          ) {
+            const { modelClear } = get();
+            modelClear();
+            return set(({ modelOptions }) => {
+              const newModelOptions = {
+                ...modelOptions,
+                dithering: dith,
+                distortion: dist,
+                rotation: rot,
+              };
+              return { modelOptions: newModelOptions };
             });
           },
 
@@ -905,30 +952,31 @@ const createMlStore = (logging: Logging) => {
           },
 
           resetModelOptions() {
-            set(({ modelOptions }) => {
-              switch (modelOptions.modelType) {
-                case ModelTypes.CNN:
-                  return { modelOptions: { ...cnnModelOptions } };
-                case ModelTypes.GRU:
-                  return { modelOptions: { ...gruModelOptions } };
-                case ModelTypes.LOGREG:
-                  return { modelOptions: { ...logRegModelOptions } };
-                case ModelTypes.DEFAULT:
-                  return { modelOptions: { ...defaultModelOptions } };
-              }
-            });
+            const { modelOptions, setModelOptions } = get();
+            switch (modelOptions.modelType) {
+              case ModelTypes.CNN:
+                setModelOptions(cnnModelOptions);
+                break;
+              case ModelTypes.LOGREG:
+                setModelOptions(logRegModelOptions);
+                break;
+              case ModelTypes.GRU:
+                setModelOptions(gruModelOptions);
+                break;
+              case ModelTypes.DEFAULT:
+                setModelOptions(defaultModelOptions);
+                break;
+            }
           },
 
           toggleModel() {
-            const { modelClear } = get();
+            const { modelClear, setModelOptions, modelOptions } = get();
             modelClear();
-            set(({ modelOptions }) => {
-              if (modelOptions.modelType == ModelTypes.DEFAULT) {
-                return { modelOptions: { ...logRegModelOptions } };
-              } else {
-                return { modelOptions: { ...defaultModelOptions } };
-              }
-            });
+            if (modelOptions.modelType == ModelTypes.DEFAULT) {
+              setModelOptions(logRegModelOptions);
+            } else {
+              setModelOptions(defaultModelOptions);
+            }
           },
 
           deleteActionRecording(id: ActionData["ID"], recordingIdx: number) {
@@ -1590,6 +1638,9 @@ const createMlStore = (logging: Logging) => {
           filterFeaturesDialogOnOpen() {
             set({ isFeaturesFilterDialogOpen: true });
           },
+          dataProcessingDialogOnOpen() {
+            set({ isDataProcessingDialogOpen: true });
+          },
           closeDialog() {
             set({
               isLanguageDialogOpen: false,
@@ -1604,6 +1655,7 @@ const createMlStore = (logging: Logging) => {
               isDeleteActionDialogOpen: false,
               isIncompatibleEditorDeviceDialogOpen: false,
               isFeaturesFilterDialogOpen: false,
+              isDataProcessingDialogOpen: false,
             });
           },
 

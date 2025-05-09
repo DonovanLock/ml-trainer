@@ -111,6 +111,9 @@ const searchGrid = async () => {
                     poolSize,
                     featuresActive: mlSettings.includedFilters,
                     modelType: ModelTypes.DEFAULT,
+                    dithering: true,
+                    distortion: true,
+                    rotation: true,
                   };
 
                   const key = `epochs=${epochs},batchSize=${batchSize},lr=${learningRate},neurons=${neuronNumber},dropout=${dropoutRate}`;
